@@ -73,6 +73,7 @@ public class ModLootTableProvider extends FabricBlockLootTableProvider {
 
         //Block drops other stuff.
         addDrop(ModBlocks.WOLFRAMITE_ORE, LightOreDrops(ModBlocks.WOLFRAMITE_ORE, ModItems.WOLFRAMITE));
+        addDrop(ModBlocks.NETHERRACK_WOLFRAMITE_ORE, LightOreDrops(ModBlocks.NETHERRACK_WOLFRAMITE_ORE, ModItems.WOLFRAMITE));
 
         addDrop(ModBlocks.RAINBOW_PYRITE_ORE, SingleItemOreDrops(ModBlocks.RAINBOW_PYRITE_ORE, ModItems.RAINBOW_PYRITE));
         addDrop(ModBlocks.SANDSTONE_RAINBOW_PYRITE_ORE, SingleItemOreDrops(ModBlocks.SANDSTONE_RAINBOW_PYRITE_ORE, ModItems.RAINBOW_PYRITE));

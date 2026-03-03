@@ -90,7 +90,7 @@ public class ModBlocks {
             properties -> new Block(properties.mapColor(MapColor.DEEPSLATE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).requiresTool().strength(1.5F, 6)));
 
     public static final Block BLOCK_OF_STEEL = registerBlock("block_of_steel",
-            properties -> new Block(properties.mapColor(MapColor.LIGHT_BLUE_GRAY).instrument(NoteBlockInstrument.IRON_XYLOPHONE).requiresTool().strength(4.5F, 5.5F).sounds(BlockSoundGroup.METAL)));
+            properties -> new Block(properties.mapColor(MapColor.LIGHT_GRAY).instrument(NoteBlockInstrument.IRON_XYLOPHONE).requiresTool().strength(4.5F, 5.5F).sounds(BlockSoundGroup.METAL)));
 
     public static final Block BLOCK_OF_CAST_STEEL_B = registerBlock("block_of_cast_steel_b",
             properties -> new Block(properties.mapColor(MapColor.LIGHT_BLUE_GRAY).instrument(NoteBlockInstrument.IRON_XYLOPHONE).requiresTool().strength(5.5F, 6.5F).sounds(BlockSoundGroup.METAL)));
@@ -120,6 +120,10 @@ public class ModBlocks {
             properties -> new ExperienceDroppingBlock(UniformIntProvider.create(2, 5), properties
                     .mapColor(MapColor.DIRT_BROWN).instrument(NoteBlockInstrument.BASEDRUM).requiresTool().strength(3, 4)));
                         //4.5 Moh Scale
+    public static final Block NETHERRACK_WOLFRAMITE_ORE = registerBlock("netherrack_wolframite_ore",
+            properties -> new ExperienceDroppingBlock(UniformIntProvider.create(2, 5), properties
+                    .mapColor(MapColor.DIRT_BROWN).instrument(NoteBlockInstrument.BASEDRUM).requiresTool().strength(3, 4)));
+
     public static final Block SCHEELITE_ORE = registerBlock("scheelite_ore",
             properties -> new ExperienceDroppingBlock(UniformIntProvider.create(2, 5), properties
                     .mapColor(MapColor.DARK_RED).instrument(NoteBlockInstrument.BASEDRUM).requiresTool().strength(3, 4).sounds(BlockSoundGroup.NETHERRACK)));

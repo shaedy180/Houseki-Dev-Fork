@@ -428,8 +428,6 @@ public class ModLootTableModifiers {
                         .rolls(UniformLootNumberProvider.create(1f, 2f))
                         .with(ItemEntry.builder(ModItems.RAINBOW_PYRITE_NAUTILUS_ARMOR).weight(3)
                                 .apply(SetCountLootFunction.builder(UniformLootNumberProvider.create(1.0f, 1.0f))))
-                        .with(ItemEntry.builder(ModItems.STEEL_NAUTILUS_ARMOR).weight(3)
-                                .apply(SetCountLootFunction.builder(UniformLootNumberProvider.create(1.0f, 1.0f))))
                         .with(ItemEntry.builder(ModItems.ALUMINUM_NAUTILUS_ARMOR).weight(3)
                                 .apply(SetCountLootFunction.builder(UniformLootNumberProvider.create(1.0f, 1.0f))))
                         .with(ItemEntry.builder(ModItems.CAST_STEEL_NAUTILUS_ARMOR).weight(2)

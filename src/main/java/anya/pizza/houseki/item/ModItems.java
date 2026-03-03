@@ -119,14 +119,6 @@ public class ModItems {
     public static final Item PLATINUM_SPEAR = registerItem("platinum_spear", setting -> new Item(setting.spear(ModToolMaterials.PLATINUM, 1.13F, 1.5F, 0.3F,
             2.5F, 7.0F, 5.5F, 5.1F, 7.75F, 4.6F)));
 
-    public static final Item STEEL_PICKAXE = registerItem("steel_pickaxe", setting -> new Item(setting.pickaxe(ModToolMaterials.STEEL, 0.5f, 1.0f)));
-    public static final Item STEEL_AXE = registerItem("steel_axe", setting -> new AxeItem(ModToolMaterials.STEEL, 4.0f, 1.0f, setting));
-    public static final Item STEEL_SHOVEL = registerItem("steel_shovel", setting -> new ShovelItem(ModToolMaterials.STEEL, 0.0f, 1.0f, setting));
-    public static final Item STEEL_SWORD = registerItem("steel_sword", setting -> new Item(setting.sword(ModToolMaterials.STEEL, 2, 1.0f)));
-    public static final Item STEEL_HOE = registerItem("steel_hoe", setting -> new HoeItem(ModToolMaterials.STEEL, -5.5f, 4.0f, setting));
-    public static final Item STEEL_SPEAR = registerItem("steel_spear", setting -> new Item(setting.spear(ModToolMaterials.STEEL, 1.05F, 1.075F, 0.5F,
-            3.0F, 7.5F, 6.5F, 5.1F, 10.0F, 4.6F)));
-
     public static final Item CAST_STEEL_PICKAXE = registerItem("cast_steel_pickaxe", setting -> new Item(setting.pickaxe(ModToolMaterials.CAST_STEEL, 1, 1.0f)));
     public static final Item CAST_STEEL_AXE = registerItem("cast_steel_axe", setting -> new AxeItem(ModToolMaterials.CAST_STEEL, 4.5f, 1.0f, setting));
     public static final Item CAST_STEEL_SHOVEL = registerItem("cast_steel_shovel", setting -> new ShovelItem(ModToolMaterials.CAST_STEEL, 0.3f, 1.0f, setting));
@@ -181,11 +173,6 @@ public class ModItems {
     public static final Item PLATINUM_LEGGINGS = registerItem("platinum_leggings", setting -> new Item(setting.armor(ModArmorMaterials.PLATINUM_MATERIAL, EquipmentType.LEGGINGS)));
     public static final Item PLATINUM_BOOTS = registerItem("platinum_boots", setting -> new Item(setting.armor(ModArmorMaterials.PLATINUM_MATERIAL, EquipmentType.BOOTS)));
 
-    public static final Item STEEL_HELMET = registerItem("steel_helmet", setting -> new Item(setting.armor(ModArmorMaterials.STEEL_MATERIAL, EquipmentType.HELMET)));
-    public static final Item STEEL_CHESTPLATE = registerItem("steel_chestplate", setting -> new Item(setting.armor(ModArmorMaterials.STEEL_MATERIAL, EquipmentType.CHESTPLATE)));
-    public static final Item STEEL_LEGGINGS = registerItem("steel_leggings", setting -> new Item(setting.armor(ModArmorMaterials.STEEL_MATERIAL, EquipmentType.LEGGINGS)));
-    public static final Item STEEL_BOOTS = registerItem("steel_boots", setting -> new Item(setting.armor(ModArmorMaterials.STEEL_MATERIAL, EquipmentType.BOOTS)));
-
     public static final Item CAST_STEEL_HELMET = registerItem("cast_steel_helmet", setting -> new ModArmorItem(setting.armor(ModArmorMaterials.CAST_STEEL_MATERIAL, EquipmentType.HELMET)));
     public static final Item CAST_STEEL_CHESTPLATE = registerItem("cast_steel_chestplate", setting -> new Item(setting.armor(ModArmorMaterials.CAST_STEEL_MATERIAL, EquipmentType.CHESTPLATE)));
     public static final Item CAST_STEEL_LEGGINGS = registerItem("cast_steel_leggings", setting -> new Item(setting.armor(ModArmorMaterials.CAST_STEEL_MATERIAL, EquipmentType.LEGGINGS)));
@@ -198,7 +185,6 @@ public class ModItems {
     public static final Item ALUMINUM_HORSE_ARMOR = registerItem("aluminum_horse_armor", setting -> new Item(setting.horseArmor(ModArmorMaterials.ALUMINUM_MATERIAL).maxCount(1)));
     public static final Item SAPPHIRE_HORSE_ARMOR = registerItem("sapphire_horse_armor", setting -> new Item(setting.horseArmor(ModArmorMaterials.SAPPHIRE_MATERIAL).maxCount(1)));
     public static final Item PLATINUM_HORSE_ARMOR = registerItem("platinum_horse_armor", setting -> new Item(setting.horseArmor(ModArmorMaterials.PLATINUM_MATERIAL).maxCount(1)));
-    public static final Item STEEL_HORSE_ARMOR = registerItem("steel_horse_armor", setting -> new Item(setting.horseArmor(ModArmorMaterials.STEEL_MATERIAL).maxCount(1)));
     public static final Item CAST_STEEL_HORSE_ARMOR = registerItem("cast_steel_horse_armor", setting -> new Item(setting.horseArmor(ModArmorMaterials.CAST_STEEL_MATERIAL).maxCount(1)));
     public static final Item NEPHRITE_HORSE_ARMOR = registerItem("nephrite_horse_armor", setting -> new Item(setting.horseArmor(ModArmorMaterials.NEPHRITE_MATERIAL).maxCount(1)));
     public static final Item JADEITE_HORSE_ARMOR = registerItem("jadeite_horse_armor", setting -> new Item(setting.horseArmor(ModArmorMaterials.JADEITE_MATERIAL).maxCount(1)));
@@ -210,7 +196,6 @@ public class ModItems {
     public static final Item ALUMINUM_NAUTILUS_ARMOR = registerItem("aluminum_nautilus_armor", setting -> new Item(setting.nautilusArmor(ModArmorMaterials.ALUMINUM_MATERIAL).maxCount(1)));
     public static final Item SAPPHIRE_NAUTILUS_ARMOR = registerItem("sapphire_nautilus_armor", setting -> new Item(setting.nautilusArmor(ModArmorMaterials.SAPPHIRE_MATERIAL).maxCount(1)));
     public static final Item PLATINUM_NAUTILUS_ARMOR = registerItem("platinum_nautilus_armor", setting -> new Item(setting.nautilusArmor(ModArmorMaterials.PLATINUM_MATERIAL).maxCount(1)));
-    public static final Item STEEL_NAUTILUS_ARMOR = registerItem("steel_nautilus_armor", setting -> new Item(setting.nautilusArmor(ModArmorMaterials.STEEL_MATERIAL).maxCount(1)));
     public static final Item CAST_STEEL_NAUTILUS_ARMOR = registerItem("cast_steel_nautilus_armor", setting -> new Item(setting.nautilusArmor(ModArmorMaterials.CAST_STEEL_MATERIAL).maxCount(1)));
     public static final Item NEPHRITE_NAUTILUS_ARMOR = registerItem("nephrite_nautilus_armor", setting -> new Item(setting.nautilusArmor(ModArmorMaterials.NEPHRITE_MATERIAL).maxCount(1)));
     public static final Item JADEITE_NAUTILUS_ARMOR = registerItem("jadeite_nautilus_armor", setting -> new Item(setting.nautilusArmor(ModArmorMaterials.JADEITE_MATERIAL).maxCount(1)));
@@ -236,7 +221,6 @@ public class ModItems {
         entries.add(JADEITE);
         entries.add(SULFUR);
         entries.add(CRUDE_IRON);
-        entries.add(STEEL);
         entries.add(CAST_STEEL);
     }
 
