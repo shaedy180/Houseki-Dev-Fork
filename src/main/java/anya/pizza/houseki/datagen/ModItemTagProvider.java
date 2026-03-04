@@ -5,6 +5,7 @@ import anya.pizza.houseki.util.ModTags;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.advancement.AdvancementRequirements;
+import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.ItemTags;
@@ -286,5 +287,17 @@ public class ModItemTagProvider extends FabricTagProvider.ItemTagProvider {
                 .add(ModItems.JADEITE_SPEAR)
                 .add(ModItems.PLATINUM_SPEAR)
                 .add(ModItems.CAST_STEEL_SPEAR);
+
+        valueLookupBuilder(ModTags.Items.CASTS)
+                .add(ModItems.PICKAXE_HEAD_CAST)
+                .add(ModItems.AXE_HEAD_CAST)
+                .add(ModItems.SHOVEL_HEAD_CAST)
+                .add(ModItems.SWORD_HEAD_CAST)
+                .add(ModItems.HOE_HEAD_CAST)
+                .add(ModItems.SPEAR_HEAD_CAST)
+                .add(ModItems.HELMET_CAST)
+                .add(ModItems.CHESTPLATE_CAST)
+                .add(ModItems.LEGGINGS_CAST)
+                .add(ModItems.BOOTS_CAST);
     }
 }

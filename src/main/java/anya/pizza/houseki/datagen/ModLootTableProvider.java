@@ -66,7 +66,7 @@ public class ModLootTableProvider extends FabricBlockLootTableProvider {
         addDrop(ModBlocks.SLATE_TILE_SLAB, slabDrops(ModBlocks.SLATE_TILE_SLAB));
         addDrop(ModBlocks.BLOCK_OF_SULFUR);
         addDrop(ModBlocks.BLOCK_OF_STEEL);
-        addDrop(ModBlocks.BLOCK_OF_CAST_STEEL_B);
+        addDrop(ModBlocks.BLOCK_OF_CAST_STEEL);
         addDrop(ModBlocks.BAUXITE);
         addDrop(ModBlocks.PLATINUM_ORE);
         addDrop(ModBlocks.DEEPSLATE_PLATINUM_ORE);

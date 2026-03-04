@@ -53,7 +53,7 @@ public class ModRecipeProvider extends FabricRecipeProvider {
                 CrusherRecipeBuilder.create(Ingredient.ofItems(Items.SANDSTONE), new ItemStack(Items.SAND), 100).chance(0.2)
                         .auxiliary(new ItemStack(Items.CALCITE)).offerTo(exporter, String.valueOf(Identifier.of("houseki", "sandstone_crushing")));
 
-                CrusherRecipeBuilder.create(Ingredient.ofItems(ModItems.WOLFRAMITE), new ItemStack(ModItems.TUNGSTEN), 250).chance(0.5)
+                CrusherRecipeBuilder.create(Ingredient.ofItems(ModItems.WOLFRAMITE), new ItemStack(ModItems.TUNGSTEN_POWDER), 250).chance(0.5)
                         .auxiliary(new ItemStack(Items.QUARTZ)).offerTo(exporter, String.valueOf(Identifier.of("houseki", "wolframite_crushing")));
 
                 // Crushing recipes WITHOUT an auxiliary output (it will default to Optional.empty())
@@ -71,7 +71,7 @@ public class ModRecipeProvider extends FabricRecipeProvider {
                 CrusherRecipeBuilder.create(Ingredient.ofItems(Items.COPPER_INGOT), new ItemStack(ModItems.PLATINUM_NUGGET), 250)
                         .offerTo(exporter, String.valueOf(Identifier.of("houseki", "copper_ingot_crushing")));
 
-                CrusherRecipeBuilder.create(Ingredient.ofItems(ModItems.SCHEELITE), new ItemStack(ModItems.TUNGSTEN), 250)
+                CrusherRecipeBuilder.create(Ingredient.ofItems(ModItems.SCHEELITE), new ItemStack(ModItems.TUNGSTEN_POWDER), 250)
                         .offerTo(exporter, String.valueOf(Identifier.of("houseki", "scheelite_crushing")));
 
                 // Smithing Upgrades
@@ -107,7 +107,7 @@ public class ModRecipeProvider extends FabricRecipeProvider {
                 offerReversibleCompactingRecipes(RecipeCategory.BUILDING_BLOCKS, ModItems.PLATINUM, RecipeCategory.DECORATIONS, ModBlocks.BLOCK_OF_PLATINUM);
                 offerReversibleCompactingRecipes(RecipeCategory.BUILDING_BLOCKS, ModItems.SULFUR, RecipeCategory.DECORATIONS, ModBlocks.BLOCK_OF_SULFUR);
                 offerReversibleCompactingRecipes(RecipeCategory.BUILDING_BLOCKS, ModItems.STEEL, RecipeCategory.DECORATIONS, ModBlocks.BLOCK_OF_STEEL);
-                offerReversibleCompactingRecipes(RecipeCategory.BUILDING_BLOCKS, ModItems.CAST_STEEL, RecipeCategory.DECORATIONS, ModBlocks.BLOCK_OF_CAST_STEEL_B);
+                offerReversibleCompactingRecipes(RecipeCategory.BUILDING_BLOCKS, ModItems.CAST_STEEL, RecipeCategory.DECORATIONS, ModBlocks.BLOCK_OF_CAST_STEEL);
 
 
                 // Smelting Recipes
@@ -398,8 +398,8 @@ public class ModRecipeProvider extends FabricRecipeProvider {
                         .pattern(" X ")
                         .pattern("#R#")
                         .pattern("###")
-                        .input('X', ModItems.CAST_STEEL).input('#', ModBlocks.BLOCK_OF_CAST_STEEL_B).input('R', Items.REDSTONE).criterion(hasItem(ModItems.CAST_STEEL), conditionsFromItem(ModItems.CAST_STEEL))
-                        .criterion(hasItem(ModBlocks.BLOCK_OF_CAST_STEEL_B), conditionsFromItem(ModBlocks.BLOCK_OF_CAST_STEEL_B)).criterion(hasItem(Items.REDSTONE), conditionsFromItem(Items.REDSTONE)).offerTo(exporter);
+                        .input('X', ModItems.CAST_STEEL).input('#', ModBlocks.BLOCK_OF_CAST_STEEL).input('R', Items.REDSTONE).criterion(hasItem(ModItems.CAST_STEEL), conditionsFromItem(ModItems.CAST_STEEL))
+                        .criterion(hasItem(ModBlocks.BLOCK_OF_CAST_STEEL), conditionsFromItem(ModBlocks.BLOCK_OF_CAST_STEEL)).criterion(hasItem(Items.REDSTONE), conditionsFromItem(Items.REDSTONE)).offerTo(exporter);
 
                 createShaped(RecipeCategory.MISC, ModItems.DIAMOND_DRILL_BIT, 1)
                         .pattern(" # ")
@@ -417,13 +417,142 @@ public class ModRecipeProvider extends FabricRecipeProvider {
                         .pattern("###")
                         .input('#', ModItems.PLATINUM_NUGGET).criterion(hasItem(ModItems.PLATINUM_NUGGET), conditionsFromItem(ModItems.PLATINUM_NUGGET)).offerTo(exporter, String.valueOf(Identifier.of("houseki", "platinum_from_platinum_nuggets")));
 
+                createShapeless(RecipeCategory.MISC, ModItems.TUNGSTEN, 1)
+                        .input(ModItems.TUNGSTEN_POWDER)
+                        .input(ModItems.NICKEL_POWDER)
+                        .criterion(hasItem(ModItems.TUNGSTEN_POWDER), conditionsFromItem(ModItems.TUNGSTEN_POWDER))
+                        .criterion(hasItem(ModItems.NICKEL_POWDER), conditionsFromItem(ModItems.NICKEL_POWDER))
+                        .offerTo(exporter, String.valueOf(Identifier.of("houseki", "tungsten_from_powder")));
+
+                createShaped(RecipeCategory.MISC, ModItems.PICKAXE_HEAD_CAST, 1)
+                        .pattern("###")
+                        .pattern("#P#")
+                        .pattern("###")
+                        .input('#', ModItems.STEEL).criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .input('P', Items.WOODEN_PICKAXE).criterion(hasItem(Items.WOODEN_PICKAXE), conditionsFromItem(Items.WOODEN_PICKAXE))
+                        .offerTo(exporter);
+
+                createShaped(RecipeCategory.MISC, ModItems.AXE_HEAD_CAST, 1)
+                        .pattern("###")
+                        .pattern("#A#")
+                        .pattern("###")
+                        .input('#', ModItems.STEEL).criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .input('A', Items.WOODEN_AXE).criterion(hasItem(Items.WOODEN_AXE), conditionsFromItem(Items.WOODEN_AXE))
+                        .offerTo(exporter);
+
+                createShaped(RecipeCategory.MISC, ModItems.SHOVEL_HEAD_CAST, 1)
+                        .pattern("###")
+                        .pattern("#S#")
+                        .pattern("###")
+                        .input('#', ModItems.STEEL).criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .input('S', Items.WOODEN_SHOVEL).criterion(hasItem(Items.WOODEN_SHOVEL), conditionsFromItem(Items.WOODEN_SHOVEL))
+                        .offerTo(exporter);
+
+                createShaped(RecipeCategory.MISC, ModItems.SWORD_HEAD_CAST, 1)
+                        .pattern("###")
+                        .pattern("#S#")
+                        .pattern("###")
+                        .input('#', ModItems.STEEL).criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .input('S', Items.WOODEN_SWORD).criterion(hasItem(Items.WOODEN_SWORD), conditionsFromItem(Items.WOODEN_SWORD))
+                        .offerTo(exporter);
+
+                createShaped(RecipeCategory.MISC, ModItems.HOE_HEAD_CAST, 1)
+                        .pattern("###")
+                        .pattern("#H#")
+                        .pattern("###")
+                        .input('#', ModItems.STEEL).criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .input('H', Items.WOODEN_HOE).criterion(hasItem(Items.WOODEN_HOE), conditionsFromItem(Items.WOODEN_HOE))
+                        .offerTo(exporter);
+
+                createShaped(RecipeCategory.MISC, ModItems.SPEAR_HEAD_CAST, 1)
+                        .pattern("###")
+                        .pattern("#S#")
+                        .pattern("###")
+                        .input('#', ModItems.STEEL).criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .input('S', Items.WOODEN_SPEAR).criterion(hasItem(Items.WOODEN_SPEAR), conditionsFromItem(Items.WOODEN_SPEAR))
+                        .offerTo(exporter);
+
+                createShaped(RecipeCategory.MISC, ModItems.HELMET_CAST, 1)
+                        .pattern("###")
+                        .pattern("#H#")
+                        .pattern("###")
+                        .input('#', ModItems.STEEL).criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .input('H', Items.IRON_HELMET).criterion(hasItem(Items.IRON_HELMET), conditionsFromItem(Items.IRON_HELMET))
+                        .offerTo(exporter);
+
+                createShaped(RecipeCategory.MISC, ModItems.CHESTPLATE_CAST, 1)
+                        .pattern("###")
+                        .pattern("#C#")
+                        .pattern("###")
+                        .input('#', ModItems.STEEL).criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .input('C', Items.IRON_CHESTPLATE).criterion(hasItem(Items.IRON_CHESTPLATE), conditionsFromItem(Items.IRON_CHESTPLATE))
+                        .offerTo(exporter);
+
+                createShaped(RecipeCategory.MISC, ModItems.LEGGINGS_CAST, 1)
+                        .pattern("###")
+                        .pattern("#L#")
+                        .pattern("###")
+                        .input('#', ModItems.STEEL).criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .input('L', Items.IRON_LEGGINGS).criterion(hasItem(Items.IRON_LEGGINGS), conditionsFromItem(Items.IRON_LEGGINGS))
+                        .offerTo(exporter);
+
+                createShaped(RecipeCategory.MISC, ModItems.BOOTS_CAST, 1)
+                        .pattern("###")
+                        .pattern("#B#")
+                        .pattern("###")
+                        .input('#', ModItems.STEEL).criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .input('B', Items.IRON_BOOTS).criterion(hasItem(Items.IRON_BOOTS), conditionsFromItem(Items.IRON_BOOTS))
+                        .offerTo(exporter);
+
+                createShapeless(RecipeCategory.MISC, ModItems.PICKAXE_HEAD, 1)
+                        .input(ModItems.PICKAXE_HEAD_CAST)
+                        .input(ModItems.STEEL, 2)
+                        .criterion(hasItem(ModItems.PICKAXE_HEAD_CAST), conditionsFromItem(ModItems.PICKAXE_HEAD_CAST))
+                        .criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .offerTo(exporter);
+
+                createShapeless(RecipeCategory.MISC, ModItems.AXE_HEAD, 1)
+                        .input(ModItems.AXE_HEAD_CAST)
+                        .input(ModItems.STEEL, 2)
+                        .criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .criterion(hasItem(ModItems.AXE_HEAD_CAST), conditionsFromItem(ModItems.AXE_HEAD_CAST))
+                        .offerTo(exporter);
+
+                createShapeless(RecipeCategory.MISC, ModItems.SHOVEL_HEAD, 1)
+                        .input(ModItems.SHOVEL_HEAD_CAST)
+                        .input(ModItems.STEEL, 2)
+                        .criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .criterion(hasItem(ModItems.SHOVEL_HEAD_CAST), conditionsFromItem(ModItems.SHOVEL_HEAD_CAST))
+                        .offerTo(exporter);
+
+                createShapeless(RecipeCategory.MISC, ModItems.SWORD_HEAD, 1)
+                        .input(ModItems.SWORD_HEAD_CAST)
+                        .input(ModItems.STEEL, 1)
+                        .criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .criterion(hasItem(ModItems.SWORD_HEAD_CAST), conditionsFromItem(ModItems.SWORD_HEAD_CAST))
+                        .offerTo(exporter);
+
+                createShapeless(RecipeCategory.MISC, ModItems.HOE_HEAD, 1)
+                        .input(ModItems.HOE_HEAD_CAST)
+                        .input(ModItems.STEEL, 1)
+                        .criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .criterion(hasItem(ModItems.HOE_HEAD_CAST), conditionsFromItem(ModItems.HOE_HEAD_CAST))
+                        .offerTo(exporter);
+
+                createShapeless(RecipeCategory.MISC, ModItems.SPEAR_HEAD, 1)
+                        .input(ModItems.SPEAR_HEAD_CAST)
+                        .input(ModItems.STEEL, 1)
+                        .criterion(hasItem(ModItems.STEEL), conditionsFromItem(ModItems.STEEL))
+                        .criterion(hasItem(ModItems.SPEAR_HEAD_CAST), conditionsFromItem(ModItems.SPEAR_HEAD_CAST))
+                        .offerTo(exporter);
+
                 //Smithing Template Dupe Recipe
                 createShaped(RecipeCategory.MISC, ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE, 2)
                         .pattern("#X#")
                         .pattern("#U#")
                         .pattern("###")
-                        .input('#', ModItems.CAST_STEEL).input('X', ModBlocks.BLOCK_OF_CAST_STEEL_B).input('U', ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE)
-                        .criterion(hasItem(ModItems.CAST_STEEL), conditionsFromItem(ModItems.CAST_STEEL)).criterion(hasItem(ModBlocks.BLOCK_OF_CAST_STEEL_B), conditionsFromItem(ModBlocks.BLOCK_OF_CAST_STEEL_B)).criterion(hasItem(ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE), conditionsFromItem(ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE))
+                        .input('#', ModItems.CAST_STEEL).input('X', ModBlocks.BLOCK_OF_CAST_STEEL).input('U', ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE)
+                        .criterion(hasItem(ModItems.CAST_STEEL), conditionsFromItem(ModItems.CAST_STEEL)).criterion(hasItem(ModBlocks.BLOCK_OF_CAST_STEEL), conditionsFromItem(ModBlocks.BLOCK_OF_CAST_STEEL)).criterion(hasItem(ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE), conditionsFromItem(ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE))
                         .offerTo(exporter);
             }
         };

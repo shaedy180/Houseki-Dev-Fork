@@ -61,6 +61,7 @@ public class ModTags {
 
         public static final TagKey<Item> ARMOR = createTag("armor");
         public static final TagKey<Item> MOB_ARMORS = createTag("mob_armors");
+        public static final TagKey<Item> CASTS = createTag("casts");
 
         private static TagKey<Item> createTag(String name) {
             return TagKey.of(RegistryKeys.ITEM, Identifier.of(Houseki.MOD_ID, name));

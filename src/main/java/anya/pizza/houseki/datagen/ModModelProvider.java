@@ -49,7 +49,7 @@ public class ModModelProvider extends FabricModelProvider {
         blockStateModelGenerator.registerSimpleCubeAll(ModBlocks.SULFUR_ORE);
         blockStateModelGenerator.registerSimpleCubeAll(ModBlocks.BLOCK_OF_SULFUR);
         blockStateModelGenerator.registerSimpleCubeAll(ModBlocks.BLOCK_OF_STEEL);
-        blockStateModelGenerator.registerSimpleCubeAll(ModBlocks.BLOCK_OF_CAST_STEEL_B);
+        blockStateModelGenerator.registerSimpleCubeAll(ModBlocks.BLOCK_OF_CAST_STEEL);
 
         blockStateModelGenerator.registerCooker(ModBlocks.CRUSHER, TexturedModel.ORIENTABLE);
 
@@ -81,6 +81,7 @@ public class ModModelProvider extends FabricModelProvider {
         itemModelGenerator.register(ModItems.WOLFRAMITE, Models.GENERATED);
         itemModelGenerator.register(ModItems.SCHEELITE, Models.GENERATED);
         itemModelGenerator.register(ModItems.TUNGSTEN, Models.GENERATED);
+        itemModelGenerator.register(ModItems.TUNGSTEN_POWDER, Models.GENERATED);
         itemModelGenerator.register(ModItems.CRUSHED_BAUXITE, Models.GENERATED);
         itemModelGenerator.register(ModItems.ALUMINUM, Models.GENERATED);
         itemModelGenerator.register(ModItems.SAPPHIRE, Models.GENERATED);
@@ -92,6 +93,7 @@ public class ModModelProvider extends FabricModelProvider {
         itemModelGenerator.register(ModItems.CRUDE_IRON, Models.GENERATED);
         itemModelGenerator.register(ModItems.STEEL, Models.GENERATED);
         itemModelGenerator.register(ModItems.CAST_STEEL, Models.GENERATED);
+        itemModelGenerator.register(ModItems.NICKEL_POWDER, Models.GENERATED);
         itemModelGenerator.register(ModItems.TUNGSTEN_DRILL_BIT, Models.GENERATED);
         itemModelGenerator.register(ModItems.SIMPLE_DRILL_HEAD, Models.GENERATED);
         itemModelGenerator.register(ModItems.ENHANCED_DRILL_HEAD, Models.GENERATED);
@@ -221,5 +223,23 @@ public class ModModelProvider extends FabricModelProvider {
         itemModelGenerator.register(ModItems.CAST_STEEL_NAUTILUS_ARMOR, Models.GENERATED);
         itemModelGenerator.register(ModItems.NEPHRITE_NAUTILUS_ARMOR, Models.GENERATED);
         itemModelGenerator.register(ModItems.JADEITE_NAUTILUS_ARMOR, Models.GENERATED);
+
+        itemModelGenerator.register(ModItems.PICKAXE_HEAD_CAST, Models.GENERATED);
+        itemModelGenerator.register(ModItems.AXE_HEAD_CAST, Models.GENERATED);
+        itemModelGenerator.register(ModItems.SHOVEL_HEAD_CAST, Models.GENERATED);
+        itemModelGenerator.register(ModItems.SWORD_HEAD_CAST, Models.GENERATED);
+        itemModelGenerator.register(ModItems.HOE_HEAD_CAST, Models.GENERATED);
+        itemModelGenerator.register(ModItems.SPEAR_HEAD_CAST, Models.GENERATED);
+        itemModelGenerator.register(ModItems.HELMET_CAST, Models.GENERATED);
+        itemModelGenerator.register(ModItems.CHESTPLATE_CAST, Models.GENERATED);
+        itemModelGenerator.register(ModItems.LEGGINGS_CAST, Models.GENERATED);
+        itemModelGenerator.register(ModItems.BOOTS_CAST, Models.GENERATED);
+
+        itemModelGenerator.register(ModItems.PICKAXE_HEAD, Models.GENERATED);
+        itemModelGenerator.register(ModItems.AXE_HEAD, Models.GENERATED);
+        itemModelGenerator.register(ModItems.SHOVEL_HEAD, Models.GENERATED);
+        itemModelGenerator.register(ModItems.SWORD_HEAD, Models.GENERATED);
+        itemModelGenerator.register(ModItems.HOE_HEAD, Models.GENERATED);
+        itemModelGenerator.register(ModItems.SPEAR_HEAD, Models.GENERATED);
     }
 }

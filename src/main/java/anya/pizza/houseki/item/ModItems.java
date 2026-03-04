@@ -36,6 +36,9 @@ public class ModItems {
     public static final Item CRUDE_IRON = registerItem("crude_iron", Item::new);
     public static final Item STEEL = registerItem("steel", Item::new);
     public static final Item CAST_STEEL = registerItem("cast_steel", setting -> new Item(setting.trimMaterial(ModTrimMaterials.CAST_STEEL)));
+    public static final Item NICKEL_POWDER = registerItem("nickel_powder", Item::new);
+    public static final Item TUNGSTEN_POWDER = registerItem("tungsten_powder", Item::new);
+
     public static final Item TUNGSTEN_DRILL_BIT = registerItem("tungsten_drill_bit", setting -> new Item(setting.fireproof()));
     public static final Item SIMPLE_DRILL_HEAD = registerItem("simple_drill_head", Item::new);
     public static final Item ENHANCED_DRILL_HEAD = registerItem("enhanced_drill_head", Item::new);
@@ -44,7 +47,6 @@ public class ModItems {
     public static final Item DIAMOND_DRILL_BIT = registerItem("diamond_drill_bit", Item::new);
 
     public static final Item BLOCK_OF_TUNGSTEN = registerItem("block_of_tungsten", setting -> new BlockItem(ModBlocks.BLOCK_OF_TUNGSTEN_B, setting.fireproof()));
-    public static final Item BLOCK_OF_CAST_STEEL = registerItem("block_of_cast_steel", setting -> new BlockItem(ModBlocks.BLOCK_OF_CAST_STEEL_B, setting)); //For Smithing Templates Crafting
 
     public static final Item PINKU_UPGRADE_SMITHING_TEMPLATE = registerItem("pinku_upgrade_smithing_template", PinkuTemplateItem::createPinkuUpgrade);
     public static final Item DRILL_UPGRADE_SMITHING_TEMPLATE = registerItem("drill_upgrade_smithing_template", DrillTemplateItem::createDrillUpgrade);
@@ -199,6 +201,26 @@ public class ModItems {
     public static final Item CAST_STEEL_NAUTILUS_ARMOR = registerItem("cast_steel_nautilus_armor", setting -> new Item(setting.nautilusArmor(ModArmorMaterials.CAST_STEEL_MATERIAL).maxCount(1)));
     public static final Item NEPHRITE_NAUTILUS_ARMOR = registerItem("nephrite_nautilus_armor", setting -> new Item(setting.nautilusArmor(ModArmorMaterials.NEPHRITE_MATERIAL).maxCount(1)));
     public static final Item JADEITE_NAUTILUS_ARMOR = registerItem("jadeite_nautilus_armor", setting -> new Item(setting.nautilusArmor(ModArmorMaterials.JADEITE_MATERIAL).maxCount(1)));
+
+    //Casts
+    public static final Item PICKAXE_HEAD_CAST = registerItem("pickaxe_head_cast", Item::new);
+    public static final Item AXE_HEAD_CAST = registerItem("axe_head_cast", Item::new);
+    public static final Item SHOVEL_HEAD_CAST = registerItem("shovel_head_cast", Item::new);
+    public static final Item SWORD_HEAD_CAST = registerItem("sword_head_cast", Item::new);
+    public static final Item HOE_HEAD_CAST = registerItem("hoe_head_cast", Item::new);
+    public static final Item SPEAR_HEAD_CAST = registerItem("spear_head_cast", Item::new);
+    public static final Item HELMET_CAST = registerItem("helmet_cast", setting -> new Item(setting.recipeRemainder(Items.IRON_HELMET).maxCount(1)));
+    public static final Item CHESTPLATE_CAST = registerItem("chestplate_cast", setting -> new Item(setting.recipeRemainder(Items.IRON_CHESTPLATE).maxCount(1)));
+    public static final Item LEGGINGS_CAST = registerItem("leggings_cast", setting -> new Item(setting.recipeRemainder(Items.IRON_LEGGINGS).maxCount(1)));
+    public static final Item BOOTS_CAST = registerItem("boots_cast", setting -> new Item(setting.recipeRemainder(Items.IRON_BOOTS).maxCount(1)));
+
+    //Heads
+    public static final Item PICKAXE_HEAD = registerItem("pickaxe_head", setting -> new Item(setting.maxCount(1)));
+    public static final Item AXE_HEAD = registerItem("axe_head", setting -> new Item(setting.maxCount(1)));
+    public static final Item SHOVEL_HEAD = registerItem("shovel_head", setting -> new Item(setting.maxCount(1)));
+    public static final Item SWORD_HEAD = registerItem("sword_head", setting -> new Item(setting.maxCount(1)));
+    public static final Item HOE_HEAD = registerItem("hoe_head", setting -> new Item(setting.maxCount(1)));
+    public static final Item SPEAR_HEAD = registerItem("spear_head", setting -> new Item(setting.maxCount(1)));
 
     private static Item registerItem(String name, Function<Item.Settings, Item> function) {
         return Registry.register(Registries.ITEM, Identifier.of(Houseki.MOD_ID, name),

@@ -92,7 +92,7 @@ public class ModBlocks {
     public static final Block BLOCK_OF_STEEL = registerBlock("block_of_steel",
             properties -> new Block(properties.mapColor(MapColor.LIGHT_GRAY).instrument(NoteBlockInstrument.IRON_XYLOPHONE).requiresTool().strength(4.5F, 5.5F).sounds(BlockSoundGroup.METAL)));
 
-    public static final Block BLOCK_OF_CAST_STEEL_B = registerBlock("block_of_cast_steel_b",
+    public static final Block BLOCK_OF_CAST_STEEL = registerBlock("block_of_cast_steel",
             properties -> new Block(properties.mapColor(MapColor.LIGHT_BLUE_GRAY).instrument(NoteBlockInstrument.IRON_XYLOPHONE).requiresTool().strength(5.5F, 6.5F).sounds(BlockSoundGroup.METAL)));
 
     public static final Block BAUXITE = registerBlock("bauxite",

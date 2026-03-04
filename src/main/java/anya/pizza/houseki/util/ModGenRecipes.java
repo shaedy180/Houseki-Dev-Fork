@@ -1,5 +1,6 @@
 package anya.pizza.houseki.util;
 
+import anya.pizza.houseki.block.ModBlocks;
 import anya.pizza.houseki.item.ModItems;
 import net.minecraft.data.recipe.RecipeExporter;
 import net.minecraft.data.recipe.ShapedRecipeJsonBuilder;
@@ -28,7 +29,7 @@ public class ModGenRecipes {
    }
 
     public static void offerDrillUpgradeRecipe(RecipeExporter exporter, Item input, RecipeCategory category, Item result) {
-        SmithingTransformRecipeJsonBuilder.create(Ingredient.ofItems(ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE), Ingredient.ofItems(input), Ingredient.ofItems(ModItems.BLOCK_OF_CAST_STEEL), category, result)
+        SmithingTransformRecipeJsonBuilder.create(Ingredient.ofItems(ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE), Ingredient.ofItems(input), Ingredient.ofItems(ModBlocks.BLOCK_OF_CAST_STEEL), category, result)
                 .criterion("has_block_of_cast_steel", conditionsFromItemPredicates()).offerTo(exporter, getItemPath(result) + "_smithing");
     }
 
