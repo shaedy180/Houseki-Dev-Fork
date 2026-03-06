@@ -267,8 +267,10 @@ public class CrusherBlockEntity extends BlockEntity implements ExtendedScreenHan
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction side) {
         if (slot == FUEL_SLOT) return getFuelTime(stack) > 0;
-        if (slot == INPUT_SLOT) ((ServerWorld) this.getWorld()).getRecipeManager()
-                .getFirstMatch(ModRecipes.CRUSHER_TYPE, new CrusherRecipeInput(stack), world).isPresent();
+        if (slot == INPUT_SLOT) {
+            ((ServerWorld) this.getWorld()).getRecipeManager()
+                    .getFirstMatch(ModRecipes.CRUSHER_TYPE, new CrusherRecipeInput(stack), world).isPresent();
+        }
         return false;
     }
 
@@ -285,7 +287,7 @@ public class CrusherBlockEntity extends BlockEntity implements ExtendedScreenHan
 
     @Override
     public boolean canPlayerUse(PlayerEntity player) {
-        return pos.isWithinDistance(pos, 4.5);
+        return player.squaredDistanceTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= 64;
     }
 
     @Override

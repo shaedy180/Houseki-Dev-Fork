@@ -271,6 +271,8 @@ public class ModItemGroups {
                         entries.add(ModBlocks.BLOCK_OF_SULFUR);
                         entries.add(ModBlocks.BLOCK_OF_STEEL);
                         entries.add(ModBlocks.BLOCK_OF_CAST_STEEL);
+                        entries.add(ModBlocks.METEORIC_IRON);
+                        entries.add(ModBlocks.BLOCK_OF_METEORIC_IRON);
                     }).build());
 
     public static void registerItemGroups() {

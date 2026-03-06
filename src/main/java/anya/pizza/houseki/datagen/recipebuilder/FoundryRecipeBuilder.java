@@ -44,7 +44,7 @@ public class FoundryRecipeBuilder implements CraftingRecipeJsonBuilder {
                 .criteriaMerger(AdvancementRequirements.CriterionMerger.OR);
         this.criteria.forEach(advancement::criterion);
         FoundryRecipe recipe = new FoundryRecipe(input, output, meltTime);
-        exporter.accept(recipeKey, recipe, null);
+        exporter.accept(recipeKey, recipe, advancement.build(recipeKey.getValue()));
     }
 
     @Override
@@ -61,6 +61,6 @@ public class FoundryRecipeBuilder implements CraftingRecipeJsonBuilder {
 
     @Override
     public Item getOutputItem() {
-        return Items.AIR;
+        return output.getItem();
     }
 }
