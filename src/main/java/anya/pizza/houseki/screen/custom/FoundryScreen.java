@@ -43,16 +43,17 @@ public class FoundryScreen extends HandledScreen<FoundryScreenHandler> {
     }
 
     /**
-     * Renders the foundry GUI background and its dynamic progress indicators.
+     * Draws the foundry GUI background centered on screen and overlays its dynamic progress indicators.
      *
-     * Draws the static GUI texture centered on screen, then overlays:
-     * - a melting flame graphic when the foundry is burning (height based on metal level),
-     * - the fluid (molten metal) fill gauge (vertical portion based on metal level),
-     * - a melt progress arrow (horizontal width based on melt progress),
-     * - a cast progress arrow (horizontal width based on cast progress).
+     * The overlays include:
+     * - a flame/melting indicator when burning,
+     * - the molten-metal fluid fill gauge,
+     * - a horizontal melt progress arrow,
+     * - a horizontal cast progress arrow,
+     * - an optionally displayed cooling-slot item with an alpha overlay representing cooling progress.
      *
-     * @param context the drawing context to issue texture draw calls
-     * @param delta   partial tick time used for interpolated rendering updates
+     * @param context the drawing context used for texture and item rendering
+     * @param delta   partial tick time for interpolated visuals
      * @param mouseX  current mouse x position (screen coordinates)
      * @param mouseY  current mouse y position (screen coordinates)
      */

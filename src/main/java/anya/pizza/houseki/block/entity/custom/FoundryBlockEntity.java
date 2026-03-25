@@ -64,18 +64,24 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     private boolean isCrafting = false;
     private ItemStack lastInput = ItemStack.EMPTY;
     /**
-     * Creates a FoundryBlockEntity at the specified position and block state and initializes its property delegate.
+     * Constructs a FoundryBlockEntity at the given position and initializes its property delegate for UI synchronization.
      *
-     * <p>The property delegate exposes nine indices used for UI synchronization:
-     * 0 = meltProgress,
-     * 1 = maxMeltProgress,
-     * 2 = fuelTime (or lastValidFuelTime when fuelTime is zero),
-     * 3 = maxFuelTime,
-     * 4 = metalLevel,
-     * 5 = maxMetalLevel,
-     * 6 = castProgress,
-     * 7 = maxCastProgress,
-     * 8 = isCrafting (1 if crafting, 0 otherwise).
+     * <p>The property delegate exposes eleven integer properties (indices 0–10) used by the screen handler:
+     * <ul>
+     *   <li>0 = current melt progress</li>
+     *   <li>1 = maximum melt progress</li>
+     *   <li>2 = current fuel time (getter returns `fuelTime` while burning or `lastValidFuelTime` when not burning)</li>
+     *   <li>3 = maximum fuel time</li>
+     *   <li>4 = current metal level</li>
+     *   <li>5 = maximum metal level</li>
+     *   <li>6 = current cast progress</li>
+     *   <li>7 = maximum cast progress</li>
+     *   <li>8 = `1` if crafting is active (getter) / cooling progress (setter)</li>
+     *   <li>9 = cooling progress (getter) / maximum cooling progress (setter)</li>
+     *   <li>10 = maximum cooling progress (getter)</li>
+     * </ul>
+     *
+     * Note: the delegate's getter, setter, and reported size reflect the implementation's index coverage and behavior.
      *
      * @param pos   the block position of this block entity
      * @param state the block state at the given position
@@ -85,10 +91,10 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
         super(ModBlockEntities.FOUNDRY_BE, pos, state);
         this.propertyDelegate = new PropertyDelegate() {
             /**
-             * Retrieve a synchronization property value by index for the screen handler.
+             * Get the synchronization property value exposed to the screen handler for a given index.
              *
-             * @param index property index (0–8) identifying which value to return
-             * @return the value for the requested property:
+             * @param index the property index (0–10) identifying which value to return
+             * @return the integer value for the requested property:
              *         0 = current melt progress,
              *         1 = maximum melt progress,
              *         2 = current fuel time (or last valid fuel time when not burning),
@@ -97,7 +103,9 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
              *         5 = maximum metal level,
              *         6 = current cast progress,
              *         7 = maximum cast progress,
-             *         8 = `1` if crafting is active, `0` otherwise; returns `0` for an invalid index
+             *         8 = `1` if crafting is active, `0` otherwise,
+             *         9 = current cooling progress,
+             *         10 = maximum cooling progress; returns `0` for an invalid index
              */
             @Override
             public int get(int index) {
@@ -118,14 +126,15 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
             }
 
             /**
-             * Assigns an internal property identified by its index to the given value.
+             * Sets an internal synchronized property identified by its index.
              *
-             * Index mapping:
+             * Indices:
              * 0 = meltProgress, 1 = maxMeltProgress, 2 = fuelTime, 3 = maxFuelTime,
-             * 4 = metalLevel, 5 = maxMetalLevel, 6 = castProgress, 7 = maxCastProgress.
+             * 4 = metalLevel, 5 = maxMetalLevel, 6 = castProgress, 7 = maxCastProgress,
+             * 8 = coolingProgress, 9 = maxCoolingProgress.
              *
-             * @param index the property index (0–7) to set
-             * @param value the new integer value for the selected property
+             * @param index the property index to set (supported 0–9); indices outside this range are ignored
+             * @param value the new integer value to assign to the selected property
              */
             @Override
             public void set(int index, int value) {
@@ -187,13 +196,23 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     }
 
     /**
-     * Persists this block entity's inventory and runtime state into the provided WriteView for saving or syncing.
-     *
-     * Writes inventory contents and the following integer properties: `progress` (melt progress),
-     * `max_progress` (max melt progress), `fuel_time`, `max_fuel_time`, `metal_level`, and `cast_time`.
-     *
-     * @param view the WriteView to receive saved data
-     */
+         * Writes the block entity's inventory and integer state fields into the provided WriteView for saving or network sync.
+         *
+         * The following keys are written:
+         * - Inventory: via Inventories.writeData(view, inventory)
+         * - "progress": current melt progress
+         * - "max_progress": maximum melt progress
+         * - "fuel_time": remaining fuel time
+         * - "max_fuel_time": last or maximum fuel time
+         * - "metal_level": current metal stored
+         * - "max_metal_level": maximum metal capacity
+         * - "cast_time": current cast progress
+         * - "max_cast_time": maximum cast progress
+         * - "cooling_time": current cooling progress
+         * - "max_cooling_time": maximum cooling progress
+         *
+         * @param view the WriteView to receive saved data
+         */
     @Override
     protected void writeData(WriteView view) {
         super.writeData(view);
@@ -211,18 +230,22 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     }
 
     /**
-     * Loads the block entity's inventory and persisted progress/fuel/metal state from the given view.
-     *
-     * Reads inventory contents and the following integer keys from the view:
-     * - "melt_progress" → meltProgress
-     * - "max_melt_progress" → maxMeltProgress
-     * - "fuel_time" → fuelTime
-     * - "max_fuel_time" → maxFuelTime
-     * - "metal_level" → metalLevel
-     * - "cast_time" → castProgress
-     *
-     * @param view the ReadView containing persisted data (e.g., NBT) for this block entity
-     */
+         * Load the block entity's inventory and persisted progress, fuel, metal, cast, and cooling state from the provided view.
+         *
+         * Reads inventory contents and the following integer keys from the view and assigns them to the corresponding fields:
+         * - "melt_progress" → meltProgress
+         * - "max_melt_progress" → maxMeltProgress
+         * - "fuel_time" → fuelTime
+         * - "max_fuel_time" → maxFuelTime
+         * - "metal_level" → metalLevel
+         * - "max_metal_level" → maxMetalLevel
+         * - "cast_time" → castProgress
+         * - "max_cast_time" → maxCastProgress
+         * - "cooling_time" → coolingProgress
+         * - "max_cooling_time" → maxCoolingProgress
+         *
+         * @param view the ReadView containing persisted data (for example NBT) for this block entity
+         */
     @Override
     protected void readData(ReadView view) {
         super.readData(view);
@@ -240,15 +263,11 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     }
 
     /**
-     * Performs server-side per-tick processing for the foundry: manages fuel consumption, melting of input
-     * into molten metal, casting of metal into outputs, and synchronizes the block's lit state and dirty flag.
+     * Performs the foundry's server-side per-tick work: manages fuel, melting, casting, cooling, and synchronizes the block state.
      *
-     * <p>Behavior:
-     * - Decrements remaining burn time when burning and attempts to consume a fuel item when out of fuel and work is pending.
-     * - Advances melt progress while burning and able to melt; on completion consumes the input and increases the metal level.
-     * - Advances cast progress while burning and able to cast; on completion produces the casted item.
-     * - Applies cooldown to melt and cast progress when not actively melting/casting.
-     * - Updates the block state's LIT property when burning starts or stops and marks the block entity dirty when state or inventory changes.
+     * <p>Only meaningful on the server side. This method consumes fuel when needed, advances or decays melt/cast/cooling progress while burning,
+     * transfers items between inventory slots when operations complete, updates the stored metal level, updates the block's LIT property when burning
+     * starts or stops, and marks/syncs the block entity when its state or inventory changes.
      */
     public void tick(World world, BlockPos pos, BlockState state) {
         if (world.isClient()) return;
@@ -360,13 +379,11 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     }
 
     /**
-     * Determines whether the block can perform a casting operation with the current cast and metal.
+     * Determines whether casting can proceed with the current cast, metal, and slot states.
      *
-     * Checks that a cast item is present, at least 90 metal units are available, the cast maps to a valid
-     * result, and the output slot can accept the produced item (either empty or same item type with room
-     * for the produced stack).
-     *
-     * @return `true` if casting can proceed, `false` otherwise.
+     * @return `true` if a cast item is present, `metalLevel` is at least 90, the cast produces a valid result,
+     *         the output slot can accept the produced item (empty or same item with sufficient space), and the
+     *         cooling slot is empty; `false` otherwise.
      */
     private boolean canCast() {
         ItemStack cast = getStack(CAST_SLOT);
@@ -380,6 +397,11 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
                 getStack(COOLING_SLOT).isEmpty());
     }
 
+    /**
+     * Checks whether the cooled item can be moved into the output slot without exceeding stack limits.
+     *
+     * @return `true` if the output slot is empty or contains the same item and has enough remaining capacity to accept the cooled item's count, `false` otherwise.
+     */
     private boolean canFinishCooling() {
         ItemStack coolingItem = getStack(COOLING_SLOT);
         ItemStack output = getStack(OUTPUT_SLOT);
@@ -484,12 +506,23 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
         return slot == OUTPUT_SLOT;
     }
 
+    /**
+     * Creates the network packet that synchronizes this block entity's state to clients.
+     *
+     * @return the BlockEntity update packet containing this entity's NBT, or `null` if no packet should be sent
+     */
     @Nullable
     @Override
     public Packet<ClientPlayPacketListener> toUpdatePacket() {
         return BlockEntityUpdateS2CPacket.create(this);
     }
 
+    /**
+     * Produce the block entity's initial NBT used when the chunk is sent to clients.
+     *
+     * @param registries a registry lookup used when constructing the NBT representation
+     * @return an NbtCompound containing this block entity's initial state for chunk synchronization
+     */
     @Override
     public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
         return createNbt(registries);
