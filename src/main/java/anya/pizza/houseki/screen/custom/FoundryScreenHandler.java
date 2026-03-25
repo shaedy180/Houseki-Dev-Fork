@@ -1,19 +1,18 @@
 package anya.pizza.houseki.screen.custom;
 
 import anya.pizza.houseki.block.entity.custom.FoundryBlockEntity;
-import anya.pizza.houseki.recipe.FoundryRecipeCastInput;
-import anya.pizza.houseki.recipe.ModRecipes;
+import anya.pizza.houseki.item.ModItems;
 import anya.pizza.houseki.screen.ModScreenHandlers;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 
 public class FoundryScreenHandler extends ScreenHandler {
@@ -98,10 +97,10 @@ public class FoundryScreenHandler extends ScreenHandler {
     public int getMaxMetalLevel() { return this.propertyDelegate.get(5); }
     public int getCastProgress() { return this.propertyDelegate.get(6); }
     public int getMaxCastTime() { return this.propertyDelegate.get(7); }
-    public int getCoolingProgress() { return this.propertyDelegate.get(8); }
-    public int getMaxCoolingProgress() { return this.propertyDelegate.get(9); }
+    public int getCoolingProgress() { return this.propertyDelegate.get(9); }
+    public int getMaxCoolingProgress() { return this.propertyDelegate.get(10); }
     public boolean isBurning() { return this.propertyDelegate.get(2) > 0; }
-    public boolean isCrafting() { return propertyDelegate.get(4) > 0; }
+    public boolean isCrafting() { return propertyDelegate.get(8) > 0; }
 
     /**
      * Computes the horizontal melt progress for the UI arrow, scaled to a 24-pixel width.
@@ -121,61 +120,61 @@ public class FoundryScreenHandler extends ScreenHandler {
     public int getScaledFuelProgress() {
         int fuelTime = propertyDelegate.get(2);
         int maxFuelTime = propertyDelegate.get(3);
-        int progressPixelSize = 20;
+        int progressPixelSize = 14;
         return maxFuelTime > 0 && fuelTime > 0 ? (fuelTime * progressPixelSize) / maxFuelTime : 0;
     }
 
-    /**
-     * Moves items between the player inventory and the foundry inventory for a shift-clicked slot.
-     *
-     * Attempts to transfer the stack from a foundry slot into the player inventory, or from the
-     * player inventory into the appropriate foundry slot (fuel slot if the item is fuel, input
-     * slots if a matching foundry recipe exists). If the transfer cannot be completed the method
-     * leaves inventories unchanged for that operation.
-     *
-     * @param player  the player performing the quick-move action
-     * @param invSlot the index of the clicked slot
-     * @return a copy of the moved ItemStack, or ItemStack.EMPTY if no transfer occurred
-     */
     @Override
     public ItemStack quickMove(PlayerEntity player, int invSlot) {
-        ItemStack newStack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(invSlot);
+        ItemStack itemStack = ItemStack.EMPTY;
+        Slot slot = slots.get(invSlot);
+
         if (slot != null && slot.hasStack()) {
             ItemStack originalStack = slot.getStack();
-            newStack = originalStack.copy();
-            if (invSlot < inventory.size()) {
-                if (!insertItem(originalStack, inventory.size(), slots.size(), true)) {
+            itemStack = originalStack.copy();
+
+            if (invSlot < 5) {
+                if (!this.insertItem(originalStack, 5, 41, true)) {
                     return ItemStack.EMPTY;
                 }
+                slot.onQuickTransfer(originalStack, itemStack);
             } else {
-                if (blockEntity.getFuelTime(originalStack) > 0) {
-                    if (!insertItem(originalStack, 1, 3, false)) {
+                if (originalStack.isOf(ModItems.PICKAXE_HEAD_CAST)) {
+                    if (!this.insertItem(originalStack, 2, 3, false)) {
                         return ItemStack.EMPTY;
                     }
-                } else if (blockEntity.getWorld() instanceof ServerWorld serverWorld) {
-                    FoundryRecipeCastInput recipeCastInput = new FoundryRecipeCastInput(originalStack);
-                    boolean hasFoundryRecipe = serverWorld.getRecipeManager()
-                            .getFirstMatch(ModRecipes.FOUNDRY_TYPE, recipeCastInput, serverWorld)
-                            .isPresent();
-                    if (hasFoundryRecipe) {
-                        if (!insertItem(originalStack, 0, 2, false)) {
-                            return ItemStack.EMPTY;
-                        }
-                    } else {
+                } else if (originalStack.isOf(Items.COAL)) {
+                    if (!this.insertItem(originalStack, 1, 2, false)) {
                         return ItemStack.EMPTY;
                     }
-                } else {
-                    return ItemStack.EMPTY;
+                } else if (originalStack.isOf(ModItems.STEEL)) {
+                    if (!this.insertItem(originalStack, 0, 1, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (invSlot < 32) {
+                    if (!this.insertItem(originalStack, 32, 41, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (invSlot >= 32 && invSlot < 41) {
+                    if (!this.insertItem(originalStack, 5, 32, false)) {
+                        return ItemStack.EMPTY;
+                    }
                 }
             }
+
             if (originalStack.isEmpty()) {
                 slot.setStack(ItemStack.EMPTY);
             } else {
                 slot.markDirty();
             }
+
+            if (originalStack.getCount() == itemStack.getCount()) {
+                return ItemStack.EMPTY;
+            }
+
+            slot.onTakeItem(player, originalStack);
         }
-        return newStack;
+        return itemStack;
     }
 
     @Override
