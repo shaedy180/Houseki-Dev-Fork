@@ -118,10 +118,7 @@ public class ModLootTableModifiers {
                         .add(LootItem.lootTableItem(ModItems.ENHANCED_DRILL_HEAD).setWeight(1))
                         .add(LootItem.lootTableItem(ModItems.DIAMOND_DRILL_BIT).setWeight(1));
                 tableBuilder.pool(poolBuilder.build());
-            }
-
-            if (ANCIENT_CITY_ID.equals(key.identifier())) {
-                LootPool.Builder poolBuilder = LootPool.lootPool()
+                LootPool.Builder rarePoolBuilder = LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1))
                         .when(LootItemRandomChanceCondition.randomChance(0.05f))
                         .add(LootItem.lootTableItem(ModItems.PINKU_SHARD))
@@ -129,20 +126,18 @@ public class ModLootTableModifiers {
                         .add(LootItem.lootTableItem(ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE))
                         .add(LootItem.lootTableItem(ModItems.SIMPLE_DRILL_HEAD))
                         .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1)).build());
-                tableBuilder.withPool(poolBuilder);
+                tableBuilder.withPool(rarePoolBuilder);
             }
 
             if (BASTION_TREASURE_ID.equals(key.identifier())) {
-                LootPool.Builder poolBuilder = LootPool.lootPool()
+                LootPool.Builder rarePoolBuilder = LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1))
                         .when(LootItemRandomChanceCondition.randomChance(0.05f))
                         .add(LootItem.lootTableItem(ModItems.PINKU_SHARD))
                         .add(LootItem.lootTableItem(ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE))
                         .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1)).build());
-                tableBuilder.withPool(poolBuilder);
-            }
+                tableBuilder.withPool(rarePoolBuilder);
 
-            if (BASTION_TREASURE_ID.equals(key.identifier())) {
                 LootPool.Builder poolBuilder = LootPool.lootPool()
                         .setRolls(UniformGenerator.between(2f, 4f))
                         .add(LootItem.lootTableItem(Items.AIR).setWeight(11))
@@ -271,17 +266,14 @@ public class ModLootTableModifiers {
             }
 
             if (END_CITY_TREASURE_ID.equals(key.identifier())) {
-                LootPool.Builder poolBuilder = LootPool.lootPool()
+                LootPool.Builder rarePoolBuilder = LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1))
                         .when(LootItemRandomChanceCondition.randomChance(0.05f))
                         .add(LootItem.lootTableItem(ModItems.PINKU_SHARD))
                         .add(LootItem.lootTableItem(ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE))
                         .add(LootItem.lootTableItem(ModItems.SIMPLE_DRILL_HEAD))
                         .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1)).build());
-                tableBuilder.withPool(poolBuilder);
-            }
-
-            if (END_CITY_TREASURE_ID.equals(key.identifier())) {
+                tableBuilder.withPool(rarePoolBuilder);
                 LootPool.Builder poolBuilder = LootPool.lootPool()
                         .setRolls(UniformGenerator.between(2f, 5f))
                         .add(LootItem.lootTableItem(Items.AIR).setWeight(14))
