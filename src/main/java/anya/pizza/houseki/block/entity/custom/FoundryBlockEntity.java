@@ -572,17 +572,6 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     }
 
     /**
-     * Produce the block entity's initial NBT used when the chunk is sent to clients.
-     *
-     * @param registries a registry lookup used when constructing the NBT representation
-     * @return an NbtCompound containing this block entity's initial state for chunk synchronization
-     */
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
-        return createNbt(registries);
-    }
-
-    /**
      * Determines whether the given player may interact with this block entity based on proximity.
      *
      * @param player the player to check
