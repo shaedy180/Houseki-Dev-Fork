@@ -21,6 +21,11 @@ public record FoundryRecipe(Ingredient inputCastItem, ItemStack output, int melt
     public static final int DEFAULT_CAST_TIME = 200;
     public static final int DEFAULT_COOLING_TIME = 200;
 
+    /**
+     * Provides the recipe's ingredient list.
+     *
+     * @return a DefaultedList containing the single `Ingredient` required by this recipe
+     */
     public DefaultedList<Ingredient> getIngredients() {
         DefaultedList<Ingredient> list = DefaultedList.ofSize(1);
         list.add(this.inputCastItem);
@@ -93,11 +98,21 @@ public record FoundryRecipe(Ingredient inputCastItem, ItemStack output, int melt
                         PacketCodecs.INTEGER, FoundryRecipe::coolingTime,
                         FoundryRecipe::new);
 
+        /**
+         * Provide the MapCodec used to serialize and deserialize FoundryRecipe instances.
+         *
+         * @return the MapCodec that encodes and decodes FoundryRecipe objects
+         */
         @Override
         public MapCodec<FoundryRecipe> codec() {
             return CODEC;
         }
 
+        /**
+         * Provide the codec used to encode and decode FoundryRecipe instances for network packets.
+         *
+         * @return the packet codec that reads and writes a FoundryRecipe to a RegistryByteBuf
+         */
         @Override
         public PacketCodec<RegistryByteBuf, FoundryRecipe> packetCodec() {
             return STREAM_CODEC;

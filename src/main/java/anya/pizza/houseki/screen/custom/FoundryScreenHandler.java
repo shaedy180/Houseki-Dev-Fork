@@ -108,18 +108,78 @@ public class FoundryScreenHandler extends ScreenHandler {
         addProperties(arrayPropertyDelegate);
     }
 
-    public int getMeltProgress() { return this.propertyDelegate.get(0); }
-    public int getMaxMeltProgress() { return this.propertyDelegate.get(1); }
-    public int getFuelTime() { return this.propertyDelegate.get(2); }
-    public int getMaxFuelTime() { return this.propertyDelegate.get(3); }
-    public int getMetalLevel() { return this.propertyDelegate.get(4); }
-    public int getMaxMetalLevel() { return this.propertyDelegate.get(5); }
-    public int getCastProgress() { return this.propertyDelegate.get(6); }
-    public int getMaxCastTime() { return this.propertyDelegate.get(7); }
-    public int getCoolingProgress() { return this.propertyDelegate.get(9); }
-    public int getMaxCoolingProgress() { return this.propertyDelegate.get(10); }
-    public boolean isBurning() { return this.propertyDelegate.get(2) > 0; }
-    public boolean isCrafting() { return propertyDelegate.get(8) > 0; }
+    /**
+ * Gets the current melt progress of the foundry.
+ *
+ * @return the current melt progress value (propertyDelegate index 0)
+ */
+public int getMeltProgress() { return this.propertyDelegate.get(0); }
+    /**
+ * Gets the maximum melt progress required to complete the melting process.
+ *
+ * @return the maximum melt progress required to finish melting
+ */
+public int getMaxMeltProgress() { return this.propertyDelegate.get(1); }
+    /**
+ * Get the current remaining fuel burn time.
+ *
+ * @return the current fuel time in ticks
+ */
+public int getFuelTime() { return this.propertyDelegate.get(2); }
+    /**
+ * Gets the maximum fuel time for the foundry.
+ *
+ * @return the maximum fuel time in ticks.
+ */
+public int getMaxFuelTime() { return this.propertyDelegate.get(3); }
+    /**
+ * Gets the current metal level in the foundry.
+ *
+ * @return the current metal level stored in the property's index 4
+ */
+public int getMetalLevel() { return this.propertyDelegate.get(4); }
+    /**
+ * Retrieves the maximum metal level for the foundry.
+ *
+ * @return the maximum metal level
+ */
+public int getMaxMetalLevel() { return this.propertyDelegate.get(5); }
+    /**
+ * Gets the current cast progress used by the GUI.
+ *
+ * @return the current cast progress (property delegate index 6)
+ */
+public int getCastProgress() { return this.propertyDelegate.get(6); }
+    /**
+ * Gets the maximum cast time for the current cast operation.
+ *
+ * @return the maximum cast time in ticks
+ */
+public int getMaxCastTime() { return this.propertyDelegate.get(7); }
+    /**
+ * Gets the current cooling progress for the foundry.
+ *
+ * @return the current cooling progress as an integer from the property delegate
+ */
+public int getCoolingProgress() { return this.propertyDelegate.get(9); }
+    /**
+ * Gets the maximum cooling progress for the foundry's GUI.
+ *
+ * @return the maximum cooling progress value
+ */
+public int getMaxCoolingProgress() { return this.propertyDelegate.get(10); }
+    /**
+ * Indicates whether the foundry currently has active fuel burn.
+ *
+ * @return `true` if the foundry has fuel time remaining, `false` otherwise.
+ */
+public boolean isBurning() { return this.propertyDelegate.get(2) > 0; }
+    /**
+ * Checks if the foundry is currently performing a crafting operation.
+ *
+ * @return `true` if the foundry is performing a craft operation, `false` otherwise.
+ */
+public boolean isCrafting() { return propertyDelegate.get(8) > 0; }
 
     /**
      * Computes the horizontal melt progress for the UI arrow, scaled to a 24-pixel width.
@@ -136,6 +196,11 @@ public class FoundryScreenHandler extends ScreenHandler {
         return maxProgress > 0 && progress > 0 ? (progress * arrowPixelSize) / maxProgress : 0;
     }
 
+    /**
+     * Compute the fuel progress scaled to a 14-pixel width for rendering the fuel bar in the GUI.
+     *
+     * @return `0` if the maximum fuel time is less than or equal to zero or the current fuel time is less than or equal to zero; otherwise the current fuel time scaled to fit a 14-pixel-wide progress bar.
+     */
     public int getScaledFuelProgress() {
         int fuelTime = propertyDelegate.get(2);
         int maxFuelTime = propertyDelegate.get(3);
@@ -143,6 +208,13 @@ public class FoundryScreenHandler extends ScreenHandler {
         return maxFuelTime > 0 && fuelTime > 0 ? (fuelTime * progressPixelSize) / maxFuelTime : 0;
     }
 
+    /**
+     * Handles shift-click (quick move) transfers between the foundry container slots and the player's inventory.
+     *
+     * @param player  the player performing the quick-move action
+     * @param invSlot the index of the clicked slot within this screen handler's slot list
+     * @return the item stack that was moved (a copy of the original); `ItemStack.EMPTY` if no transfer occurred
+     */
     @Override
     public ItemStack quickMove(PlayerEntity player, int invSlot) {
         ItemStack itemStack = ItemStack.EMPTY;
@@ -196,6 +268,12 @@ public class FoundryScreenHandler extends ScreenHandler {
         return itemStack;
     }
 
+    /**
+     * Checks whether the given player may interact with this container.
+     *
+     * @param player the player attempting to use the container
+     * @return `true` if the player is allowed to use the underlying inventory, `false` otherwise
+     */
     @Override
     public boolean canUse(PlayerEntity player) {
         return inventory.canPlayerUse(player);

@@ -133,7 +133,7 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
             /**
              * Sets an internal integer property identified by index.
              *
-             * Index mapping:
+             * Indices:
              * 0 = meltProgress, 1 = maxMeltProgress, 2 = fuelTime, 3 = maxFuelTime,
              * 4 = metalLevel, 5 = maxMetalLevel, 6 = castProgress, 7 = maxCastProgress,
              * 8 = coolingProgress, 9 = maxCoolingProgress.
@@ -503,12 +503,23 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
         return slot == OUTPUT_SLOT;
     }
 
+    /**
+     * Creates the network packet that synchronizes this block entity's state to clients.
+     *
+     * @return the BlockEntity update packet containing this entity's NBT, or `null` if no packet should be sent
+     */
     @Nullable
     @Override
     public Packet<ClientPlayPacketListener> toUpdatePacket() {
         return BlockEntityUpdateS2CPacket.create(this);
     }
 
+    /**
+     * Produce the block entity's initial NBT used when the chunk is sent to clients.
+     *
+     * @param registries a registry lookup used when constructing the NBT representation
+     * @return an NbtCompound containing this block entity's initial state for chunk synchronization
+     */
     @Override
     public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
         return createNbt(registries);
