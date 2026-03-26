@@ -42,18 +42,6 @@ public class FoundryScreen extends HandledScreen<FoundryScreenHandler> {
         //backgroundHeight = 196;
     }
 
-    //private void renderProgressArrow(DrawContext context, int x, int y) {
-    //    if(handler.getPropertyDelegate().get(0) > 0 && handler.isCrafting()) {
-    //        context.drawTexture(RenderPipelines.GUI_TEXTURED, ARROW_TEXTURE, x + 30, y + 39, 0, 0,
-    //                handler.getScaledArrowProgress(), 16, 24, 16);
-    //    }
-    //}
-
-    //private void renderProgressArrow2(DrawContext context, int x, int y) {
-    //    if(handler.getPropertyDelegate().get(0) > 0 && handler.isCrafting()) {
-    //        context.drawTexture(RenderPipelines.GUI_TEXTURED, ARROW_TEXTURE2, x + 79, y + 39, 0, 0,
-    //                handler.getScaledArrowProgress(), 16, 24, 16);
-    //    }
     /**
      * Render the foundry GUI background and its dynamic indicators.
      *
@@ -75,23 +63,23 @@ public class FoundryScreen extends HandledScreen<FoundryScreenHandler> {
         context.drawTexture(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE, x, y, 0, 0, 176, 176, 256, 256);
 
         if (handler.isBurning()) {
-            int fireHeight = (int) ((float) handler.getMetalLevel() / handler.getMaxMetalLevel() * 50);
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, MELTING_TEXTURE, x + 27, y + 40 + (14 - fireHeight), 176, 14 - fireHeight, 14, fireHeight, 256, 256);
+            int fireHeight = handler.getScaledFuelProgress();
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, MELTING_TEXTURE, x + 27, y + 36 + (14 - fireHeight), 0, 14 - fireHeight, 14, fireHeight, 14, 14);
         }
 
         if (handler.getMetalLevel() > 0) {
-            int scaledFluidHeight = (int) ((float) handler.getMetalLevel() / handler.getMaxMetalLevel() * 50);
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, FLUID_TEXTURE, x + 80, y + 20 + (50 - scaledFluidHeight), 0, 50 - scaledFluidHeight, 16, scaledFluidHeight, 16, 43);
+            int scaledFluidHeight = (int) ((float) handler.getMetalLevel() / handler.getMaxMetalLevel() * 16);
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, FLUID_TEXTURE, x + 80, y + 25 + (50 - scaledFluidHeight), 0, 43 - scaledFluidHeight, 16, scaledFluidHeight, 16, 43);
         }
 
         if (handler.getMeltProgress() > 0) {
             int meltPixelWidth = (int) ((float) handler.getMeltProgress() / handler.getMaxMeltProgress() * 24);
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, ARROW_TEXTURE, x + 50, y + 35, 176, 14, meltPixelWidth, 16, 256, 256);
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, ARROW_TEXTURE, x + 49, y + 35, 0, 0, meltPixelWidth, 16, 24, 16);
         }
 
         if (handler.getCastProgress() > 0) {
             int castPixelWidth = (int) ((float) handler.getCastProgress() / handler.getMaxCastTime() * 24);
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, ARROW_TEXTURE2, x + 105, y + 35, 176, 30, castPixelWidth, 16, 256, 256);
+            context.drawTexture(RenderPipelines.GUI_TEXTURED, ARROW_TEXTURE2, x + 102, y + 35, 0, 0, castPixelWidth, 16, 24, 16);
         }
 
         ItemStack coolingStack = handler.getSlot(4).getStack();
@@ -108,12 +96,28 @@ public class FoundryScreen extends HandledScreen<FoundryScreenHandler> {
         //renderProgressMelting(context, x, y);
     }
 
+    //private void renderProgressArrow(DrawContext context, int x, int y) {
+    //    if(handler.getPropertyDelegate().get(0) > 0 && handler.isCrafting()) {
+    //        context.drawTexture(RenderPipelines.GUI_TEXTURED, ARROW_TEXTURE, x + 30, y + 50, 0, 0,
+    //                handler.getScaledArrowProgress(), 16, 24, 16);
+    //    }
+    //}
+
+    //private void renderProgressArrow2(DrawContext context, int x, int y) {
+    //    if(handler.getPropertyDelegate().get(0) > 0 && handler.isCrafting()) {
+    //        context.drawTexture(RenderPipelines.GUI_TEXTURED, ARROW_TEXTURE2, x + 105, y + 50, 0, 0,
+    //                handler.getScaledArrowProgress(), 16, 24, 16);
+    //    }
+    //}
+
     //private void renderProgressMelting(DrawContext context, int x, int y) {
     //    if (handler.isBurning()) {
     //        int progress = handler.getScaledFuelProgress();
-    //        context.drawTexture(RenderPipelines.GUI_TEXTURED, MELTING_TEXTURE, x + 5, y + 69 - progress, 0,
-    //                20 - progress, 6, progress, 6, 20);
+    //        context.drawTexture(RenderPipelines.GUI_TEXTURED, MELTING_TEXTURE, x + 27, y + 50 - progress, 0,
+    //                14 - progress, 14, progress, 14, 14);
     //    }
+    //}
+
     /**
      * Renders the screen background, standard UI components, and hover tooltips; shows a "Molten Steel" tooltip when the mouse is over the fluid tank.
      *

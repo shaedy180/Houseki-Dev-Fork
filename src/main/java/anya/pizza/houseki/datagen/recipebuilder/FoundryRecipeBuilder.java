@@ -22,18 +22,20 @@ public class FoundryRecipeBuilder implements CraftingRecipeJsonBuilder {
     private final Ingredient input;
     private final ItemStack output;
     private final int meltTime;
+    private final int coolingTime;
     private final Map<String, AdvancementCriterion<?>> criteria = new LinkedHashMap<>();
     @Nullable
     public String group;
 
-    public FoundryRecipeBuilder(Ingredient input, ItemStack output, int meltTime) {
+    public FoundryRecipeBuilder(Ingredient input, ItemStack output, int meltTime, int coolingTime) {
         this.input = input;
         this.output = output;
         this.meltTime = meltTime;
+        this.coolingTime = coolingTime;
     }
 
-    public static FoundryRecipeBuilder create(Ingredient input, ItemStack output, int meltTime) {
-        return new FoundryRecipeBuilder(input, output, meltTime);
+    public static FoundryRecipeBuilder create(Ingredient input, ItemStack output, int meltTime, int coolingTime) {
+        return new FoundryRecipeBuilder(input, output, meltTime, coolingTime);
     }
 
     /**
@@ -51,7 +53,7 @@ public class FoundryRecipeBuilder implements CraftingRecipeJsonBuilder {
                 .rewards(AdvancementRewards.Builder.recipe(recipeKey))
                 .criteriaMerger(AdvancementRequirements.CriterionMerger.OR);
         this.criteria.forEach(advancement::criterion);
-        FoundryRecipe recipe = new FoundryRecipe(input, output, meltTime);
+        FoundryRecipe recipe = new FoundryRecipe(input, output, meltTime, coolingTime);
         exporter.accept(recipeKey, recipe, advancement.build(recipeKey.getValue()));
     }
 

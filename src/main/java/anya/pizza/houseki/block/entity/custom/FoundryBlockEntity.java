@@ -1,5 +1,6 @@
 package anya.pizza.houseki.block.entity.custom;
 
+import anya.pizza.houseki.Houseki;
 import anya.pizza.houseki.block.custom.FoundryBlock;
 import anya.pizza.houseki.block.entity.ImplementedInventory;
 import anya.pizza.houseki.block.entity.ModBlockEntities;
@@ -9,6 +10,7 @@ import anya.pizza.houseki.recipe.FoundryRecipeCastInput;
 import anya.pizza.houseki.recipe.ModRecipes;
 import anya.pizza.houseki.screen.custom.FoundryScreenHandler;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,10 +18,12 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -244,11 +248,11 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
         fuelTime = view.getInt("fuel_time", 0);
         maxFuelTime = view.getInt("max_fuel_time", 0);
         metalLevel = view.getInt("metal_level", 0);
-        metalLevel = view.getInt("max_metal_level", 0);
+        maxMetalLevel = view.getInt("max_metal_level", 0);
         castProgress = view.getInt("cast_time", 0);
-        castProgress = view.getInt("max_cast_time", 0);
-        castProgress = view.getInt("cooling_time", 0);
-        castProgress = view.getInt("max_cooling_time", 0);
+        maxCastProgress = view.getInt("max_cast_time", 0);
+        coolingProgress = view.getInt("cooling_time", 0);
+        maxCoolingProgress = view.getInt("max_cooling_time", 0);
     }
 
     /**
@@ -308,27 +312,24 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
         //Casting
         if (isBurning && canCast()) {
             castProgress++;
-            //if (castProgress >= maxCastProgress) {
-            //    craftItem();
-            //    castProgress = 0;
-            //}
-            ItemStack result = getResultFromCast(getStack(CAST_SLOT));
-            setStack(COOLING_SLOT, result.copy());
-            metalLevel -= 90;
-            castProgress = 0;
-            coolingProgress = 1;
+            if (castProgress >= maxCastProgress) {
+                ItemStack result = getResultFromCast(getStack(CAST_SLOT));
+                setStack(COOLING_SLOT, result.copy());
+                metalLevel -= 90;
+                castProgress = 0;
+                coolingProgress = 1;
+                }
             dirty = true;
         } else {
-            //if (castProgress > 0) {
-            //    castProgress = Math.max(20, castProgress - 2);
-            //    dirty = true;
-            //}
             castProgress = 0;
         }
 
         //Cooling
         if (coolingProgress > 0) {
-            coolingProgress++;
+            if (coolingProgress < maxCoolingProgress) {
+                coolingProgress++;
+                dirty = true;
+            }
             if (coolingProgress >= maxCoolingProgress) {
                 if (canFinishCooling()) {
                     ItemStack coolingItem = getStack(COOLING_SLOT);
@@ -341,7 +342,11 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
                     }
 
                     setStack(COOLING_SLOT, ItemStack.EMPTY);
+                    setStack(CAST_SLOT, ItemStack.EMPTY);
                     coolingProgress = 0;
+
+                    markDirty();
+                    world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
                     dirty = true;
                 }
             }
@@ -353,7 +358,8 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
         }
 
         if (dirty) {
-            markDirty(world, pos, state);
+            markDirty();
+            world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
         }
     }
     /**
@@ -407,18 +413,18 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
      * If the current cast maps to an item, that item is added to OUTPUT_SLOT (merged with the existing stack if present).
      * In all cases, consumes one item from CAST_SLOT and reduces metalLevel by 90.
      */
-    private void craftItem() {
-        ItemStack cast = getStack(CAST_SLOT);
-        ItemStack output = getResultFromCast(cast);
-        metalLevel -= 90;
-        ItemStack currentOutput = getStack(OUTPUT_SLOT);
-        if (currentOutput.isEmpty()) {
-            setStack(OUTPUT_SLOT, output.copy());
-        } else {
-            currentOutput.increment(output.getCount());
-        }
-        inventory.get(CAST_SLOT).decrement(1);
-    }
+    //private void craftItem() {
+    //    ItemStack cast = getStack(CAST_SLOT);
+    //    ItemStack output = getResultFromCast(cast);
+    //    metalLevel -= 90;
+    //    ItemStack currentOutput = getStack(OUTPUT_SLOT);
+    //    if (currentOutput.isEmpty()) {
+    //        setStack(OUTPUT_SLOT, output.copy());
+    //    } else {
+    //        currentOutput.increment(output.getCount());
+    //    }
+    //    inventory.get(CAST_SLOT).decrement(1);
+    //}
 
     /**
      * Determine the produced output for a given cast item used in the foundry.
@@ -501,6 +507,11 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     @Override
     public Packet<ClientPlayPacketListener> toUpdatePacket() {
         return BlockEntityUpdateS2CPacket.create(this);
+    }
+
+    @Override
+    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
+        return createNbt(registries);
     }
 
     /**
