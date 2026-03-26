@@ -13,9 +13,9 @@ import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.util.FeatureContext;
 
 public class MeteoriteFeature extends Feature<DefaultFeatureConfig> {
-    private static final int MIN_RADIUS = 3;
-    private static final int MAX_RADIUS = 5;
-    private static final int CRATER_EXTRA = 3;
+    private static final int MIN_RADIUS = 5;
+    private static final int MAX_RADIUS = 8;
+    private static final int CRATER_EXTRA = 4;
 
     public MeteoriteFeature() {
         super(DefaultFeatureConfig.CODEC);
@@ -49,7 +49,7 @@ public class MeteoriteFeature extends Feature<DefaultFeatureConfig> {
 
         int radius = MIN_RADIUS + random.nextInt(MAX_RADIUS - MIN_RADIUS + 1);
         int craterRadius = radius + CRATER_EXTRA;
-        int craterDepth = radius + 1 + random.nextInt(2);
+        int craterDepth = radius + 2 + random.nextInt(3);
         // Meteorite sits at the bottom of the crater
         BlockPos meteorCenter = new BlockPos(origin.getX(), surfaceY - craterDepth, origin.getZ());
 
@@ -100,11 +100,32 @@ public class MeteoriteFeature extends Feature<DefaultFeatureConfig> {
             }
         }
 
-        // Phase 3: Line the crater rim with scorched material
-        for (int dx = -craterRadius; dx <= craterRadius; dx++) {
-            for (int dz = -craterRadius; dz <= craterRadius; dz++) {
+        // Phase 3: Scatter meteoric iron debris on the crater floor
+        int debrisCount = 2 + random.nextInt(4); // 2-5 pieces
+        for (int i = 0; i < debrisCount; i++) {
+            double angle = random.nextDouble() * Math.PI * 2;
+            double dist = (1.5 + random.nextDouble() * (craterRadius - 2));
+            int dx = (int) Math.round(Math.cos(angle) * dist);
+            int dz = (int) Math.round(Math.sin(angle) * dist);
+
+            // Find the new surface after the crater was carved
+            int debrisX = origin.getX() + dx;
+            int debrisZ = origin.getZ() + dz;
+            for (int y = surfaceY; y >= meteorCenter.getY(); y--) {
+                BlockPos check = new BlockPos(debrisX, y, debrisZ);
+                BlockPos above = check.up();
+                if (!world.getBlockState(check).isAir() && world.getBlockState(above).isAir()) {
+                    world.setBlockState(above, ModBlocks.METEORIC_IRON.getDefaultState(), 2);
+                    break;
+                }
+            }
+        }
+
+        // Phase 4: Line the crater rim with scorched ejecta
+        for (int dx = -craterRadius - 1; dx <= craterRadius + 1; dx++) {
+            for (int dz = -craterRadius - 1; dz <= craterRadius + 1; dz++) {
                 double horizDist = Math.sqrt(dx * dx + dz * dz);
-                if (horizDist < craterRadius - 1.5 || horizDist > craterRadius + 1) continue;
+                if (horizDist < craterRadius - 2 || horizDist > craterRadius + 1.5) continue;
 
                 int rimY = world.getTopY(Heightmap.Type.WORLD_SURFACE_WG, origin.getX() + dx, origin.getZ() + dz);
                 BlockPos rimPos = new BlockPos(origin.getX() + dx, rimY - 1, origin.getZ() + dz);
@@ -112,6 +133,14 @@ public class MeteoriteFeature extends Feature<DefaultFeatureConfig> {
                 if (!rimState.isAir() && !rimState.isOf(Blocks.BEDROCK)
                         && !rimState.getFluidState().isIn(FluidTags.WATER)) {
                     world.setBlockState(rimPos, getShellBlock(random), 2);
+                }
+                // Raised rim: occasionally place a block on top of the rim
+                if (horizDist >= craterRadius - 0.5 && horizDist <= craterRadius + 0.5
+                        && random.nextInt(3) == 0) {
+                    BlockPos aboveRim = new BlockPos(origin.getX() + dx, rimY, origin.getZ() + dz);
+                    if (world.getBlockState(aboveRim).isAir()) {
+                        world.setBlockState(aboveRim, getShellBlock(random), 2);
+                    }
                 }
             }
         }
