@@ -88,16 +88,6 @@ public class FoundryScreen extends HandledScreen<FoundryScreenHandler> {
                     context.fill(x + 80, y + 22 + (43 - scaledFluidHeight), x + 96, y + 65, 0x603050B0);
                 }
             }
-
-            // Small indicator for the inactive metal with outline
-            int otherLevel = activeType == FoundryBlockEntity.METAL_STEEL
-                    ? handler.getMeteoricIronLevel() : handler.getSteelLevel();
-            if (otherLevel > 0) {
-                int dotColor = activeType == FoundryBlockEntity.METAL_STEEL ? 0xFF3050B0 : 0xFFD4760A;
-                // Dark outline around the dot
-                context.fill(x + 96, y + 59, x + 101, y + 64, 0xFF202020);
-                context.fill(x + 97, y + 60, x + 100, y + 63, dotColor);
-            }
         }
 
         if (handler.getMeltProgress() > 0) {

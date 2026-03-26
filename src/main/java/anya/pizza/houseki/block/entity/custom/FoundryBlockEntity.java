@@ -308,7 +308,7 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
             dirty = true;
         } else {
             if (meltProgress > 0) {
-                meltProgress = Math.max(0, meltProgress - 2); //Cool down
+                meltProgress = 0; // Reset fully so it restarts from scratch
                 dirty = true;
             }
         }
