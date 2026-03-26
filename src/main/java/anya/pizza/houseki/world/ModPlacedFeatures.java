@@ -83,7 +83,7 @@ public class ModPlacedFeatures {
                 ModOrePlacement.modifiersWithCount(2, HeightRangePlacementModifier.uniform(YOffset.getBottom(), YOffset.getTop())));
 
         register(context, METEORITE_PLACED_KEY, configuredFeatureRegistryEntryLookup.getOrThrow(ModConfiguredFeatures.METEORITE_KEY),
-                RarityFilterPlacementModifier.of(32),
+                RarityFilterPlacementModifier.of(256),
                 SquarePlacementModifier.of(),
                 HeightmapPlacementModifier.of(Heightmap.Type.WORLD_SURFACE_WG),
                 BiomePlacementModifier.of());

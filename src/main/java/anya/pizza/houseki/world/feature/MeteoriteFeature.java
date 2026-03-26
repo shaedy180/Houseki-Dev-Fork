@@ -3,6 +3,7 @@ package anya.pizza.houseki.world.feature;
 import anya.pizza.houseki.block.ModBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Heightmap;
@@ -14,6 +15,7 @@ import net.minecraft.world.gen.feature.util.FeatureContext;
 public class MeteoriteFeature extends Feature<DefaultFeatureConfig> {
     private static final int MIN_RADIUS = 3;
     private static final int MAX_RADIUS = 5;
+    private static final int CRATER_EXTRA = 3;
 
     public MeteoriteFeature() {
         super(DefaultFeatureConfig.CODEC);
@@ -28,11 +30,52 @@ public class MeteoriteFeature extends Feature<DefaultFeatureConfig> {
         int surfaceY = world.getTopY(Heightmap.Type.WORLD_SURFACE_WG, origin.getX(), origin.getZ());
         if (surfaceY <= world.getBottomY() + 10) return false;
 
-        int radius = MIN_RADIUS + random.nextInt(MAX_RADIUS - MIN_RADIUS + 1);
-        // Center the meteorite partially buried: center is 1-2 blocks below surface
-        int buryDepth = 1 + random.nextInt(2);
-        BlockPos center = new BlockPos(origin.getX(), surfaceY - buryDepth, origin.getZ());
+        // Reject if surface block is a liquid
+        BlockPos surfacePos = new BlockPos(origin.getX(), surfaceY - 1, origin.getZ());
+        BlockState surfaceState = world.getBlockState(surfacePos);
+        if (surfaceState.getFluidState().isIn(FluidTags.WATER) || surfaceState.getFluidState().isIn(FluidTags.LAVA)) {
+            return false;
+        }
+        // Also check a few surrounding positions for water/lava
+        for (int cx = -2; cx <= 2; cx += 2) {
+            for (int cz = -2; cz <= 2; cz += 2) {
+                int checkY = world.getTopY(Heightmap.Type.WORLD_SURFACE_WG, origin.getX() + cx, origin.getZ() + cz);
+                BlockState check = world.getBlockState(new BlockPos(origin.getX() + cx, checkY - 1, origin.getZ() + cz));
+                if (check.getFluidState().isIn(FluidTags.WATER) || check.getFluidState().isIn(FluidTags.LAVA)) {
+                    return false;
+                }
+            }
+        }
 
+        int radius = MIN_RADIUS + random.nextInt(MAX_RADIUS - MIN_RADIUS + 1);
+        int craterRadius = radius + CRATER_EXTRA;
+        int craterDepth = radius + 1 + random.nextInt(2);
+        // Meteorite sits at the bottom of the crater
+        BlockPos meteorCenter = new BlockPos(origin.getX(), surfaceY - craterDepth, origin.getZ());
+
+        // Phase 1: Carve the bowl-shaped crater from the surface downward
+        for (int dx = -craterRadius; dx <= craterRadius; dx++) {
+            for (int dz = -craterRadius; dz <= craterRadius; dz++) {
+                double horizDist = Math.sqrt(dx * dx + dz * dz);
+                if (horizDist > craterRadius) continue;
+
+                // Parabolic crater profile: deeper toward center, shallower at edges
+                double depthFraction = 1.0 - (horizDist / craterRadius);
+                int localDepth = (int) (craterDepth * depthFraction * depthFraction);
+                if (localDepth < 1) continue;
+
+                int colSurfaceY = world.getTopY(Heightmap.Type.WORLD_SURFACE_WG, origin.getX() + dx, origin.getZ() + dz);
+
+                for (int y = colSurfaceY; y >= colSurfaceY - localDepth; y--) {
+                    BlockPos pos = new BlockPos(origin.getX() + dx, y, origin.getZ() + dz);
+                    BlockState state = world.getBlockState(pos);
+                    if (state.isOf(Blocks.BEDROCK)) continue;
+                    world.setBlockState(pos, Blocks.AIR.getDefaultState(), 2);
+                }
+            }
+        }
+
+        // Phase 2: Place the meteorite sphere at the bottom of the crater
         int coreRadius = Math.max(1, radius / 2);
         int placed = 0;
 
@@ -40,41 +83,35 @@ public class MeteoriteFeature extends Feature<DefaultFeatureConfig> {
             for (int dy = -radius; dy <= radius; dy++) {
                 for (int dz = -radius; dz <= radius; dz++) {
                     double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                    // Add slight noise to make the sphere irregular
                     double noisyDist = dist + (random.nextDouble() - 0.5) * 0.8;
                     if (noisyDist > radius) continue;
 
-                    BlockPos pos = center.add(dx, dy, dz);
+                    BlockPos pos = meteorCenter.add(dx, dy, dz);
                     BlockState existing = world.getBlockState(pos);
-
-                    // Don't replace bedrock or other meteorites
-                    if (existing.isOf(Blocks.BEDROCK) || existing.isOf(ModBlocks.METEORIC_IRON)) continue;
+                    if (existing.isOf(Blocks.BEDROCK)) continue;
 
                     if (noisyDist <= coreRadius) {
-                        // Core: meteoric iron
                         world.setBlockState(pos, ModBlocks.METEORIC_IRON.getDefaultState(), 2);
                     } else {
-                        // Shell: mix of stone variants representing impact-fused material
-                        BlockState shell = getShellBlock(random);
-                        world.setBlockState(pos, shell, 2);
+                        world.setBlockState(pos, getShellBlock(random), 2);
                     }
                     placed++;
                 }
             }
         }
 
-        // Clear some air above for the exposed part (small crater)
-        for (int dx = -radius; dx <= radius; dx++) {
-            for (int dz = -radius; dz <= radius; dz++) {
+        // Phase 3: Line the crater rim with scorched material
+        for (int dx = -craterRadius; dx <= craterRadius; dx++) {
+            for (int dz = -craterRadius; dz <= craterRadius; dz++) {
                 double horizDist = Math.sqrt(dx * dx + dz * dz);
-                if (horizDist > radius - 0.5) continue;
-                for (int dy = 1; dy <= buryDepth + 1; dy++) {
-                    BlockPos pos = center.add(dx, surfaceY - center.getY() + dy, dz);
-                    BlockState state = world.getBlockState(pos);
-                    if (!state.isAir() && !state.isOf(Blocks.WATER) && !state.isOf(Blocks.BEDROCK)
-                            && !state.isOf(ModBlocks.METEORIC_IRON)) {
-                        world.setBlockState(pos, Blocks.AIR.getDefaultState(), 2);
-                    }
+                if (horizDist < craterRadius - 1.5 || horizDist > craterRadius + 1) continue;
+
+                int rimY = world.getTopY(Heightmap.Type.WORLD_SURFACE_WG, origin.getX() + dx, origin.getZ() + dz);
+                BlockPos rimPos = new BlockPos(origin.getX() + dx, rimY - 1, origin.getZ() + dz);
+                BlockState rimState = world.getBlockState(rimPos);
+                if (!rimState.isAir() && !rimState.isOf(Blocks.BEDROCK)
+                        && !rimState.getFluidState().isIn(FluidTags.WATER)) {
+                    world.setBlockState(rimPos, getShellBlock(random), 2);
                 }
             }
         }
