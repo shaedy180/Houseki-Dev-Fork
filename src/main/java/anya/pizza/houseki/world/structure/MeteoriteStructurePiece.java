@@ -16,19 +16,34 @@ import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 
+/**
+ * The actual block-placing piece for the meteorite structure.
+ * Handles everything: crater excavation, wall lining, meteorite sphere, debris, and ejecta rim.
+ *
+ * Generation happens in 5 phases (see generate() for details):
+ *   1. Crater excavation (bowl shape + tree clearing)
+ *   2. Crater wall lining (replace exposed dirt/sand with stone)
+ *   3. Meteorite sphere (iron core + stone shell with noise for roughness)
+ *   4. Debris scatter (iron fragments on crater floor)
+ *   5. Ejecta rim (scorched ring around the crater edge)
+ */
 public class MeteoriteStructurePiece extends StructurePiece {
+    // Size range for the meteorite sphere (in blocks). Diameter will be 2x this.
     public static final int MIN_RADIUS = 7;
     public static final int MAX_RADIUS = 11;
+    // How much wider the crater is than the meteorite itself
     private static final int CRATER_EXTRA = 6;
+    // How far above the surface we clear blocks (to remove tall trees)
     private static final int TREE_CLEAR_HEIGHT = 20;
 
-    private final int centerX;
-    private final int surfaceY;
-    private final int centerZ;
-    private final int meteorRadius;
-    private final int craterDepth;
-    private final long seed;
+    private final int centerX;      // world X of the impact center
+    private final int surfaceY;     // Y of the terrain surface at impact
+    private final int centerZ;      // world Z of the impact center
+    private final int meteorRadius; // radius of the meteorite sphere (7-11)
+    private final int craterDepth;  // how deep the crater goes below surfaceY
+    private final long seed;        // deterministic seed for reproducible random across chunk passes
 
+    // Primary constructor, used when the structure is first created during worldgen
     public MeteoriteStructurePiece(int centerX, int surfaceY, int centerZ,
                                    int meteorRadius, int craterDepth, long seed) {
         super(ModStructures.METEORITE_PIECE_TYPE, 0,
@@ -41,6 +56,7 @@ public class MeteoriteStructurePiece extends StructurePiece {
         this.seed = seed;
     }
 
+    // NBT constructor, used when loading from a saved game. orElse() provides fallback defaults.
     public MeteoriteStructurePiece(StructureContext context, NbtCompound nbt) {
         super(ModStructures.METEORITE_PIECE_TYPE, nbt);
         this.centerX = nbt.getInt("cx").orElse(0);
@@ -51,6 +67,9 @@ public class MeteoriteStructurePiece extends StructurePiece {
         this.seed = nbt.getLong("seed").orElse(0L);
     }
 
+    // Computes the bounding box that fully encloses the structure.
+    // Horizontal: meteorite + crater + small buffer for the ejecta rim.
+    // Vertical: deep enough for the sphere at crater bottom, high enough to clear trees.
     private static BlockBox makeBounds(int cx, int sy, int cz, int r, int depth) {
         int extent = r + CRATER_EXTRA + 3;
         return new BlockBox(cx - extent, sy - depth - r - 2, cz - extent,
@@ -67,6 +86,9 @@ public class MeteoriteStructurePiece extends StructurePiece {
         nbt.putLong("seed", seed);
     }
 
+    // Returns the Y of the crater floor at a given horizontal distance from center.
+    // Uses a quadratic curve (depthFraction^2) to create a smooth bowl shape:
+    // deepest at the center, gradually rising to surface level at the edges.
     private int getCraterFloorY(double horizDist, int craterRadius) {
         if (horizDist > craterRadius) return surfaceY;
         double depthFraction = 1.0 - (horizDist / craterRadius);
@@ -74,16 +96,28 @@ public class MeteoriteStructurePiece extends StructurePiece {
         return surfaceY - localDepth;
     }
 
+    /**
+     * Main generation method. Called once per chunk that overlaps this piece's bounding box.
+     * Uses a deterministic seed so the output is identical regardless of chunk load order.
+     *
+     * Phases:
+     *   1. Crater excavation - dig the bowl and clear trees
+     *   2. Wall lining - replace exposed non-stone blocks with scorched material
+     *   3. Meteorite sphere - place the iron core and stone shell
+     *   4. Debris scatter - drop iron fragments on the crater floor
+     *   5. Ejecta rim - scorched ring with occasional raised blocks at the crater edge
+     */
     @Override
     public void generate(StructureWorldAccess world, StructureAccessor structureAccessor,
                          ChunkGenerator chunkGenerator, Random chunkRandom,
                          BlockBox chunkBox, ChunkPos chunkPos, BlockPos pivot) {
+        // Deterministic random from stored seed - critical for cross-chunk consistency
         Random random = Random.create(this.seed);
         int craterRadius = meteorRadius + CRATER_EXTRA;
         int meteorCenterY = surfaceY - craterDepth;
         BlockPos meteorCenter = new BlockPos(centerX, meteorCenterY, centerZ);
 
-        // Reject liquid locations
+        // Bail out if the center is in water or lava - meteorites in oceans look bad
         BlockPos surfacePos = new BlockPos(centerX, surfaceY - 1, centerZ);
         BlockState surfaceState = world.getBlockState(surfacePos);
         if (surfaceState.getFluidState().isIn(FluidTags.WATER)
@@ -173,6 +207,8 @@ public class MeteoriteStructurePiece extends StructurePiece {
         }
 
         // Phase 3: Place meteorite sphere
+        // The sphere has two zones: an inner core of METEORIC_IRON and an outer shell of mixed stone.
+        // Noise is added to each block's distance to create an irregular, natural-looking surface.
         int coreRadius = Math.max(2, meteorRadius / 2);
         for (int dx = -meteorRadius; dx <= meteorRadius; dx++) {
             for (int dy = -meteorRadius; dy <= meteorRadius; dy++) {
@@ -254,6 +290,8 @@ public class MeteoriteStructurePiece extends StructurePiece {
         }
     }
 
+    // Returns true for natural stone variants that don't need to be replaced in crater walls/floor.
+    // Could be improved by using a block tag instead of hardcoded checks.
     private boolean isStoneType(BlockState state) {
         return state.isOf(Blocks.STONE) || state.isOf(Blocks.COBBLESTONE)
                 || state.isOf(Blocks.DEEPSLATE) || state.isOf(Blocks.COBBLED_DEEPSLATE)
@@ -262,6 +300,8 @@ public class MeteoriteStructurePiece extends StructurePiece {
                 || state.isOf(Blocks.TUFF);
     }
 
+    // Checks all 6 neighbors. If any is air (and within the chunk box), the block is "exposed"
+    // and should be lined with crater material in Phase 2.
     private boolean isExposedToAir(StructureWorldAccess world, BlockPos pos, BlockBox box) {
         for (int i = 0; i < 6; i++) {
             BlockPos neighbor = switch (i) {
@@ -279,6 +319,7 @@ public class MeteoriteStructurePiece extends StructurePiece {
         return false;
     }
 
+    // Weighted random palette for crater floors and walls: 50% stone, 20% cobble, 20% gravel, 10% cobbled deepslate
     private BlockState getCraterLiner(Random random) {
         int roll = random.nextInt(10);
         if (roll < 5) return Blocks.STONE.getDefaultState();
@@ -287,6 +328,7 @@ public class MeteoriteStructurePiece extends StructurePiece {
         return Blocks.COBBLED_DEEPSLATE.getDefaultState();
     }
 
+    // Weighted random palette for the meteorite shell and rim: 40% stone, 20% cobble, 20% gravel, 20% deepslate
     private BlockState getShellBlock(Random random) {
         int roll = random.nextInt(10);
         if (roll < 4) return Blocks.STONE.getDefaultState();
