@@ -9,6 +9,7 @@ import anya.pizza.houseki.recipe.FoundryRecipeCastInput;
 import anya.pizza.houseki.recipe.ModRecipes;
 import anya.pizza.houseki.screen.custom.FoundryScreenHandler;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,10 +17,12 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -38,12 +41,13 @@ import org.jspecify.annotations.NonNull;
 import java.util.Optional;
 
 public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory<BlockPos>, ImplementedInventory {
-    private final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(4, ItemStack.EMPTY);
+    private final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(5, ItemStack.EMPTY);
 
     private static final int INPUT_SLOT = 0;
     private static final int FUEL_SLOT = 1;
     private static final int CAST_SLOT = 2;
     private static final int OUTPUT_SLOT = 3;
+    private static final int COOLING_SLOT = 4;
     protected final PropertyDelegate propertyDelegate;
     private int meltProgress = 0;
     private int maxMeltProgress = FoundryRecipe.DEFAULT_MELT_TIME;
@@ -53,10 +57,11 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     private int maxMetalLevel = 1000; //100 = 1 ingot, holds 10 ingots total
     private int castProgress = 0;
     private int maxCastProgress = FoundryRecipe.DEFAULT_CAST_TIME;
+    private int coolingProgress = 0;
+    private int maxCoolingProgress = FoundryRecipe.DEFAULT_COOLING_TIME;
     private int lastValidFuelTime = 0;
     private boolean isCrafting = false;
     private ItemStack lastInput = ItemStack.EMPTY;
-    private int metalType = 0; // 0 = steel, 1 = meteoric iron
     /**
      * Creates a FoundryBlockEntity at the specified position and block state and initializes its property delegate.
      *
@@ -105,6 +110,8 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
                     case 6 -> castProgress;
                     case 7 -> maxCastProgress;
                     case 8 -> isCrafting ? 1 : 0;
+                    case 9 -> coolingProgress;
+                    case 10 -> maxCoolingProgress;
                     default -> 0;
                 };
             }
@@ -130,17 +137,20 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
                     case 5 -> maxMetalLevel = value;
                     case 6 -> castProgress = value;
                     case 7 -> maxCastProgress = value;
+                    case 8 -> isCrafting = (value != 0);
+                    case 9 -> coolingProgress = value;
+                    case 10 -> maxCoolingProgress = value;
                 }
             }
 
             /**
              * Number of properties exposed by this block entity's property delegate.
              *
-             * @return the fixed size (9) of the property delegate
+             * @return the fixed size (11) of the property delegate
              */
             @Override
             public int size() {
-                return 9;
+                return 11;
             }
         };
     }
@@ -188,13 +198,16 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     protected void writeData(WriteView view) {
         super.writeData(view);
         Inventories.writeData(view, inventory);
-        view.putInt("progress", meltProgress);
-        view.putInt("max_progress", maxMeltProgress);
+        view.putInt("melt_progress", meltProgress);
+        view.putInt("max_melt_progress", maxMeltProgress);
         view.putInt("fuel_time", fuelTime);
         view.putInt("max_fuel_time", maxFuelTime);
         view.putInt("metal_level", metalLevel);
+        view.putInt("max_metal_level", maxMetalLevel);
         view.putInt("cast_time", castProgress);
-        view.putInt("metal_type", metalType);
+        view.putInt("max_cast_time", maxCastProgress);
+        view.putInt("cooling_time", coolingProgress);
+        view.putInt("max_cooling_time", maxCoolingProgress);
     }
 
     /**
@@ -219,8 +232,11 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
         fuelTime = view.getInt("fuel_time", 0);
         maxFuelTime = view.getInt("max_fuel_time", 0);
         metalLevel = view.getInt("metal_level", 0);
+        maxMetalLevel = view.getInt("max_metal_level", 0);
         castProgress = view.getInt("cast_time", 0);
-        metalType = view.getInt("metal_type", 0);
+        maxCastProgress = view.getInt("max_cast_time", 0);
+        coolingProgress = view.getInt("cooling_time", 0);
+        maxCoolingProgress = view.getInt("max_cooling_time", 0);
     }
 
     /**
@@ -265,33 +281,61 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
         if (isBurning && canMelt()) {
             meltProgress++;
             if (meltProgress >= maxMeltProgress) {
-                ItemStack meltInput = getStack(INPUT_SLOT);
-                if (metalLevel == 0) {
-                    metalType = meltInput.isOf(ModItems.STEEL) ? 0 : 1;
-                }
-                meltInput.decrement(1);
+                getStack(INPUT_SLOT).decrement(1);
                 metalLevel += 90;
                 meltProgress = 0;
             }
             dirty = true;
         } else {
             if (meltProgress > 0) {
-                meltProgress = Math.max(10, meltProgress - 2); //Cool down
+                meltProgress = Math.max(0, meltProgress - 2); //Cool down
                 dirty = true;
             }
         }
 
+        //Casting
         if (isBurning && canCast()) {
             castProgress++;
             if (castProgress >= maxCastProgress) {
-                craftItem();
+                ItemStack result = getResultFromCast(getStack(CAST_SLOT));
+                setStack(COOLING_SLOT, result.copy());
+                metalLevel -= 90;
                 castProgress = 0;
+                maxCoolingProgress = getCurrentRecipe()
+                        .map(r -> r.value().coolingTime())
+                        .orElse(FoundryRecipe.DEFAULT_COOLING_TIME);
+                coolingProgress = 1;
             }
             dirty = true;
         } else {
-            if (castProgress > 0) {
-                castProgress = Math.max(20, castProgress - 2);
+            castProgress = 0;
+        }
+
+        //Cooling
+        if (coolingProgress > 0) {
+            if (coolingProgress < maxCoolingProgress) {
+                coolingProgress++;
                 dirty = true;
+            }
+            if (coolingProgress >= maxCoolingProgress) {
+                if (canFinishCooling()) {
+                    ItemStack coolingItem = getStack(COOLING_SLOT);
+                    ItemStack output = getStack(OUTPUT_SLOT);
+
+                    if (output.isEmpty()) {
+                        setStack(OUTPUT_SLOT, coolingItem.copy());
+                    } else {
+                        output.increment(coolingItem.getCount());
+                    }
+
+                    setStack(COOLING_SLOT, ItemStack.EMPTY);
+                    setStack(CAST_SLOT, ItemStack.EMPTY);
+                    coolingProgress = 0;
+
+                    markDirty();
+                    world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
+                    dirty = true;
+                }
             }
         }
 
@@ -301,7 +345,8 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
         }
 
         if (dirty) {
-            markDirty(world, pos, state);
+            markDirty();
+            world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);
         }
     }
     /**
@@ -312,11 +357,9 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
 
     private boolean canMelt() {
         ItemStack input = getStack(INPUT_SLOT);
-        boolean hasValidInput = input.isOf(ModItems.STEEL) || input.isOf(ModItems.METEORIC_IRON_INGOT);
+        boolean hasValidInput = input.isOf(ModItems.STEEL);
         boolean hasMeltedMetal = metalLevel + 90 <= maxMetalLevel;
-        if (!hasValidInput || !hasMeltedMetal) return false;
-        int inputType = input.isOf(ModItems.STEEL) ? 0 : 1;
-        return metalLevel == 0 || metalType == inputType;
+        return hasValidInput && hasMeltedMetal;
     }
 
     /**
@@ -335,30 +378,16 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
         ItemStack expectedOutput = getResultFromCast(cast);
         if (expectedOutput.isEmpty()) return false;
 
-        return output.isEmpty() || (output.isOf(expectedOutput.getItem()) &&
-                output.getCount() + expectedOutput.getCount() <= output.getMaxCount());
-        //Optional<RecipeEntry<FoundryRecipe>> recipe = getCurrentRecipe();
-        //if (recipe.isEmpty()) return false;
-        //FoundryRecipe foundryRecipe = recipe.get().value();
-        //ItemStack output = foundryRecipe.getResult(null);
-        //return canInsertIntoSlot(OUTPUT_SLOT, output);
+        return getStack(COOLING_SLOT).isEmpty() && (output.isEmpty() || (output.isOf(expectedOutput.getItem())
+        && output.getCount() + expectedOutput.getCount() <= output.getMaxCount()));
     }
 
-    /**
-     * Determine whether the given ItemStack can be placed into the specified inventory slot
-     * without violating item compatibility or stack size limits.
-     *
-     * @param slot  index of the target slot in the block entity's inventory
-     * @param stack the ItemStack intended for insertion; an empty stack is considered insertable
-     * @return      `true` if the slot can accept the stack (slot empty or same item/component and total count does not exceed the slot's max), `false` otherwise
-     */
-    //private boolean canInsertIntoSlot(int slot, ItemStack stack) {
-    //    if (stack.isEmpty()) return true;
-    //    ItemStack slotStack = inventory.get(slot);
-    //    int maxCount = slotStack.isEmpty() ? stack.getMaxCount() : slotStack.getMaxCount();
-    //    return (slotStack.isEmpty() || ItemStack.areItemsAndComponentsEqual(slotStack, stack))
-    //            && slotStack.getCount() + stack.getCount() <= maxCount;
-    //}
+    private boolean canFinishCooling() {
+        ItemStack coolingItem = getStack(COOLING_SLOT);
+        ItemStack output = getStack(OUTPUT_SLOT);
+        return output.isEmpty() || (output.isOf(coolingItem.getItem()) && output.getCount() +
+                coolingItem.getCount() <= output.getMaxCount());
+    }
 
     /**
      * Produce the item corresponding to the current cast and apply its effects.
@@ -367,24 +396,18 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
      * and subtracts 90 from metalLevel. If the cast does not map to a valid result, only metalLevel is
      * reduced and the output slot remains unchanged.
      */
-    private void craftItem() {
-        ItemStack cast = getStack(CAST_SLOT);
-        ItemStack output = getResultFromCast(cast);
-        metalLevel -= 90;
-        ItemStack currentOutput = getStack(OUTPUT_SLOT);
-        if (currentOutput.isEmpty()) {
-            setStack(OUTPUT_SLOT, output.copy());
-        } else {
-            currentOutput.increment(output.getCount());
-        }
-        inventory.get(CAST_SLOT).decrement(1);
-        //Optional<RecipeEntry<FoundryRecipe>> recipe = getCurrentRecipe();
-        //if (recipe.isEmpty()) return;
-        //FoundryRecipe foundryRecipe = recipe.get().value();
-        // Handles Main Output
-        //insertOrIncrement(OUTPUT_SLOT, foundryRecipe.getResult(null).copy(), 1.0);
-        //inventory.get(INPUT_SLOT).decrement(1);
-    }
+    //private void craftItem() {
+    //    ItemStack cast = getStack(CAST_SLOT);
+    //    ItemStack output = getResultFromCast(cast);
+    //    metalLevel -= 90;
+    //    ItemStack currentOutput = getStack(OUTPUT_SLOT);
+    //    if (currentOutput.isEmpty()) {
+    //        setStack(OUTPUT_SLOT, output.copy());
+    //    } else {
+    //        currentOutput.increment(output.getCount());
+    //    }
+    //    inventory.get(CAST_SLOT).decrement(1);
+    //}
 
     /**
      * Determine the produced output for a given cast item used in the foundry.
@@ -393,20 +416,8 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
      * @return the resulting ItemStack for the cast (a pickaxe head) or `ItemStack.EMPTY` if no match
      */
     private ItemStack getResultFromCast(ItemStack cast) {
-        if (metalType == 0) {
-            if (cast.isOf(ModItems.PICKAXE_HEAD_CAST)) return new ItemStack(ModItems.CS_PICKAXE_HEAD);
-            if (cast.isOf(ModItems.AXE_HEAD_CAST)) return new ItemStack(ModItems.CS_AXE_HEAD);
-            if (cast.isOf(ModItems.SHOVEL_HEAD_CAST)) return new ItemStack(ModItems.CS_SHOVEL_HEAD);
-            if (cast.isOf(ModItems.SWORD_HEAD_CAST)) return new ItemStack(ModItems.CS_SWORD_HEAD);
-            if (cast.isOf(ModItems.HOE_HEAD_CAST)) return new ItemStack(ModItems.CS_HOE_HEAD);
-            if (cast.isOf(ModItems.SPEAR_HEAD_CAST)) return new ItemStack(ModItems.CS_SPEAR_HEAD);
-        } else if (metalType == 1) {
-            if (cast.isOf(ModItems.PICKAXE_HEAD_CAST)) return new ItemStack(ModItems.MI_PICKAXE_HEAD);
-            if (cast.isOf(ModItems.AXE_HEAD_CAST)) return new ItemStack(ModItems.MI_AXE_HEAD);
-            if (cast.isOf(ModItems.SHOVEL_HEAD_CAST)) return new ItemStack(ModItems.MI_SHOVEL_HEAD);
-            if (cast.isOf(ModItems.SWORD_HEAD_CAST)) return new ItemStack(ModItems.MI_SWORD_HEAD);
-            if (cast.isOf(ModItems.HOE_HEAD_CAST)) return new ItemStack(ModItems.MI_HOE_HEAD);
-            if (cast.isOf(ModItems.SPEAR_HEAD_CAST)) return new ItemStack(ModItems.MI_SPEAR_HEAD);
+        if (cast.isOf(ModItems.PICKAXE_HEAD_CAST)) {
+            return new ItemStack(ModItems.CS_PICKAXE_HEAD);
         }
         return ItemStack.EMPTY;
     }
@@ -479,6 +490,11 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     @Override
     public Packet<ClientPlayPacketListener> toUpdatePacket() {
         return BlockEntityUpdateS2CPacket.create(this);
+    }
+
+    @Override
+    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registries) {
+        return createNbt(registries);
     }
 
     /**

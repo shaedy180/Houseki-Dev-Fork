@@ -16,13 +16,10 @@ import net.minecraft.world.World;
 import java.util.List;
 
 
-public record FoundryRecipe(Ingredient inputCastItem, ItemStack output, int meltTime) implements Recipe<FoundryRecipeCastInput> {
+public record FoundryRecipe(Ingredient inputCastItem, ItemStack output, int meltTime, int coolingTime) implements Recipe<FoundryRecipeCastInput> {
     public static final int DEFAULT_MELT_TIME = 200;
     public static final int DEFAULT_CAST_TIME = 200;
-
-    //public FoundryRecipe(Ingredient inputItem, ItemStack output, int meltTime) {
-    //    this(inputCastItem, output, meltTime);
-    //}
+    public static final int DEFAULT_COOLING_TIME = 200;
 
     public DefaultedList<Ingredient> getIngredients() {
         DefaultedList<Ingredient> list = DefaultedList.ofSize(1);
@@ -84,7 +81,8 @@ public record FoundryRecipe(Ingredient inputCastItem, ItemStack output, int melt
         public static final MapCodec<FoundryRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 Ingredient.CODEC.fieldOf("ingredient").forGetter(FoundryRecipe::inputCastItem),
                 ItemStack.CODEC.fieldOf("result").forGetter(FoundryRecipe::output),
-                Codec.INT.optionalFieldOf("meltTime", DEFAULT_MELT_TIME).forGetter(FoundryRecipe::meltTime)
+                Codec.INT.optionalFieldOf("meltTime", DEFAULT_MELT_TIME).forGetter(FoundryRecipe::meltTime),
+                Codec.INT.optionalFieldOf("coolingTime", DEFAULT_COOLING_TIME).forGetter(FoundryRecipe::coolingTime)
         ).apply(inst, FoundryRecipe::new));
 
         public static final PacketCodec<RegistryByteBuf, FoundryRecipe> STREAM_CODEC =
@@ -92,6 +90,7 @@ public record FoundryRecipe(Ingredient inputCastItem, ItemStack output, int melt
                         Ingredient.PACKET_CODEC, FoundryRecipe::inputCastItem,
                         ItemStack.PACKET_CODEC, FoundryRecipe::output,
                         PacketCodecs.INTEGER, FoundryRecipe::meltTime,
+                        PacketCodecs.INTEGER, FoundryRecipe::coolingTime,
                         FoundryRecipe::new);
 
         @Override
@@ -105,70 +104,3 @@ public record FoundryRecipe(Ingredient inputCastItem, ItemStack output, int melt
         }
     }
 }
-/*public record FoundryRecipe implements Recipe<FoundryRecipeCastInput> {
-    private final ItemStack cast;
-    private final ItemStack result;
-    private final int metalCost;
-
-    public FoundryRecipe(ItemStack cast, ItemStack result, int metalCost) {
-        this.cast = cast;
-        this.result = result;
-        this.metalCost = metalCost;
-    }
-
-    @Override
-    public boolean matches(FoundryRecipeCastInput input, World world) {
-        return ItemStack.areItemsEqual(input.cast(), this.cast);
-    }
-
-    @Override
-    public ItemStack craft(FoundryRecipeCastInput input, RegistryWrapper.WrapperLookup lookup) {
-        return result.copy();
-    }
-
-    public boolean fits(int width, int height) {
-        return true;
-    }
-
-    public ItemStack getResult(RegistryWrapper.WrapperLookup lookup) {
-        return result;
-    }
-
-    public int getMetalCost() {
-        return metalCost;
-    }
-
-    @Override
-    public RecipeSerializer<? extends Recipe<FoundryRecipeCastInput>> getSerializer() {
-        return ModRecipes.FOUNDRY_SERIALIZER;
-    }
-
-    @Override
-    public RecipeType<? extends Recipe<FoundryRecipeCastInput>> getType() {
-        return ModRecipes.FOUNDRY_TYPE;
-    }
-
-    public static class Serializer implements RecipeSerializer<FoundryRecipe> {
-        public static final MapCodec<FoundryRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
-                ItemStack.CODEC.fieldOf("cast").forGetter(r -> r.cast),
-                ItemStack.CODEC.fieldOf("result").forGetter(r -> r.result),
-                Codec.INT.fieldOf("metal_cost").orElse(90).forGetter(r -> r.metalCost)
-        ).apply(inst, FoundryRecipe::new));
-
-        @Override
-        public PacketCodec<RegistryByteBuf, FoundryRecipe> packetCodec() {
-            return null;
-        }
-    }
-
-    @Override
-    public IngredientPlacement getIngredientPlacement() {
-        return null;
-    }
-
-    @Override
-    public RecipeBookCategory getRecipeBookCategory() {
-        return null;
-    }
-}
-*/
