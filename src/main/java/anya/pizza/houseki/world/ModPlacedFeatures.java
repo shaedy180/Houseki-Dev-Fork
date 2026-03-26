@@ -34,7 +34,6 @@ public class ModPlacedFeatures {
     public static final RegistryKey<PlacedFeature> ORE_LIMESTONE_PLACED_KEY = registerKey("ore_limestone_placed");
     public static final RegistryKey<PlacedFeature> ORE_SLATE_PLACED_KEY = registerKey("ore_slate_placed");
     public static final RegistryKey<PlacedFeature> ORE_BAUXITE_PLACED_KEY = registerKey("ore_bauxite_placed");
-    public static final RegistryKey<PlacedFeature> METEORITE_PLACED_KEY = registerKey("meteorite_placed");
 
     public static void bootstrap(Registerable<PlacedFeature> context) {
         var configuredFeatureRegistryEntryLookup = context.getRegistryLookup(RegistryKeys.CONFIGURED_FEATURE);
@@ -81,12 +80,6 @@ public class ModPlacedFeatures {
                 ModOrePlacement.modifiersWithCount(2, HeightRangePlacementModifier.uniform(YOffset.getBottom(), YOffset.getTop())));
         register(context, ORE_BAUXITE_PLACED_KEY, configuredFeatureRegistryEntryLookup.getOrThrow(ModConfiguredFeatures.ORE_BAUXITE_KEY),
                 ModOrePlacement.modifiersWithCount(2, HeightRangePlacementModifier.uniform(YOffset.getBottom(), YOffset.getTop())));
-
-        register(context, METEORITE_PLACED_KEY, configuredFeatureRegistryEntryLookup.getOrThrow(ModConfiguredFeatures.METEORITE_KEY),
-                RarityFilterPlacementModifier.of(512),
-                SquarePlacementModifier.of(),
-                HeightmapPlacementModifier.of(Heightmap.Type.WORLD_SURFACE_WG),
-                BiomePlacementModifier.of());
     }
 
     public static RegistryKey<PlacedFeature> registerKey(String name) {
