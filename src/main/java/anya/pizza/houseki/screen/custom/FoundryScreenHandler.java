@@ -21,13 +21,14 @@ public class FoundryScreenHandler extends ScreenHandler {
     public final FoundryBlockEntity blockEntity;
 
     /**
-     * Creates a FoundryScreenHandler for the given player inventory and foundry block position.
+     * Create a FoundryScreenHandler for the player's inventory bound to the foundry at the given block position.
      *
-     * Resolves the block entity at the provided position and attaches a new ArrayPropertyDelegate with nine properties.
+     * Attaches a new ArrayPropertyDelegate of size 12 and resolves the block entity at the provided position to pass
+     * to the primary constructor.
      *
      * @param syncId the synchronization id for this screen handler
      * @param inventory the player's inventory
-     * @param pos the position of the foundry block
+     * @param pos the world position of the foundry block
      * @throws IllegalStateException if the block entity at the given position is not a FoundryBlockEntity
      */
     public FoundryScreenHandler(int syncId, PlayerInventory inventory, BlockPos pos) {
@@ -35,15 +36,16 @@ public class FoundryScreenHandler extends ScreenHandler {
     }
 
     /**
-     * Create a Foundry screen handler and configure its inventory slots and GUI property synchronization.
+     * Construct a FoundryScreenHandler, configure its inventory slots (input, fuel, cast, output, and a disabled slot),
+     * register player inventory/hotbar slots, and attach the provided PropertyDelegate for GUI synchronization.
      *
-     * The provided BlockEntity must be a FoundryBlockEntity with an inventory size of 4; the handler attaches the given PropertyDelegate to synchronize melt, fuel, metal level, and cast properties.
+     * The provided {@code blockEntity} must be a {@link FoundryBlockEntity} whose inventory size is 5.
      *
      * @param syncId                window sync id assigned by the client/server
      * @param playerInventory       the player's inventory used to populate player slots and hotbar
-     * @param blockEntity           the backing block entity; must be a FoundryBlockEntity with an inventory size of 4
-     * @param arrayPropertyDelegate the PropertyDelegate used to synchronize progress, fuel, metal level, and cast-related GUI properties
-     * @throws IllegalStateException if {@code blockEntity} is not a FoundryBlockEntity
+     * @param blockEntity           the backing block entity; must be a {@code FoundryBlockEntity} with an inventory size of 5
+     * @param arrayPropertyDelegate the PropertyDelegate used to synchronize melt, fuel, metal level, cast, and cooling GUI properties
+     * @throws IllegalStateException if {@code blockEntity} is not a {@code FoundryBlockEntity}
      */
     public FoundryScreenHandler(int syncId, PlayerInventory playerInventory, BlockEntity blockEntity, PropertyDelegate arrayPropertyDelegate) {
         super(ModScreenHandlers.FOUNDRY_SCREEN_HANDLER, syncId);
@@ -56,7 +58,12 @@ public class FoundryScreenHandler extends ScreenHandler {
         this.blockEntity = foundryEntity;
         this.addSlot(new Slot(inventory, 0, 26, 18)); //Input Slot
         this.addSlot(new Slot(inventory, 1, 26, 53)); //Fuel Slot
-        this.addSlot(new Slot(inventory, 2, 134, 18) { //Cast Slot
+        this.addSlot(new Slot(inventory, 2, 134, 18) { /**
+             * Allows a player to take items from the cast slot only when the foundry reports no active cooling.
+             *
+             * @param player the player attempting to take items from the slot
+             * @return `true` if cooling is not active and the player may take items, `false` otherwise
+             */
             @Override
             public boolean canTakeItems(PlayerEntity player) {
                 return propertyDelegate.get(9) == 0;
@@ -64,10 +71,10 @@ public class FoundryScreenHandler extends ScreenHandler {
         });
         this.addSlot(new Slot(inventory, 3, 135, 53) { //Output Slot
             /**
-             * Prevents manual insertion into this output slot.
+             * Prevents any ItemStack from being inserted into this slot.
              *
-             * @param stack the item stack attempted to be inserted
-             * @return `false` always — items may not be inserted into this slot
+             * @param stack the ItemStack being offered for insertion (ignored)
+             * @return `false` always, indicating insertion is disallowed
              */
             @Override
             public boolean canInsert(ItemStack stack) {
@@ -75,10 +82,22 @@ public class FoundryScreenHandler extends ScreenHandler {
             }
         });
         this.addSlot(new Slot(inventory, 4, -1000, -1000) {
+            /**
+             * Prevents any ItemStack from being inserted into this slot.
+             *
+             * @param stack the ItemStack being offered for insertion (ignored)
+             * @return `false` always, indicating insertion is disallowed
+             */
             @Override
             public boolean canInsert(ItemStack stack) {
                 return false;
             }
+            /**
+             * Determine whether the specified player is allowed to take items from this slot.
+             *
+             * @param playerEntity the player attempting to take items
+             * @return `true` if the player may take items from this slot, `false` otherwise
+             */
             @Override
             public boolean canTakeItems(PlayerEntity playerEntity) {
                 return false;
