@@ -466,21 +466,33 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
      * @return the resulting ItemStack for the cast (a pickaxe head) or `ItemStack.EMPTY` if no match
      */
     private ItemStack getResultFromCast(ItemStack cast) {
-        // Map cast + active metal type to the correct output head
+        // Map cast + active metal type to the correct output
         if (activeMetalType == METAL_STEEL) {
+            // Tool heads
             if (cast.isOf(ModItems.PICKAXE_HEAD_CAST)) return new ItemStack(ModItems.CS_PICKAXE_HEAD);
             if (cast.isOf(ModItems.AXE_HEAD_CAST)) return new ItemStack(ModItems.CS_AXE_HEAD);
             if (cast.isOf(ModItems.SHOVEL_HEAD_CAST)) return new ItemStack(ModItems.CS_SHOVEL_HEAD);
             if (cast.isOf(ModItems.SWORD_HEAD_CAST)) return new ItemStack(ModItems.CS_SWORD_HEAD);
             if (cast.isOf(ModItems.HOE_HEAD_CAST)) return new ItemStack(ModItems.CS_HOE_HEAD);
             if (cast.isOf(ModItems.SPEAR_HEAD_CAST)) return new ItemStack(ModItems.CS_SPEAR_HEAD);
+            // Armor
+            if (cast.isOf(ModItems.HELMET_CAST)) return new ItemStack(ModItems.CAST_STEEL_HELMET);
+            if (cast.isOf(ModItems.CHESTPLATE_CAST)) return new ItemStack(ModItems.CAST_STEEL_CHESTPLATE);
+            if (cast.isOf(ModItems.LEGGINGS_CAST)) return new ItemStack(ModItems.CAST_STEEL_LEGGINGS);
+            if (cast.isOf(ModItems.BOOTS_CAST)) return new ItemStack(ModItems.CAST_STEEL_BOOTS);
         } else if (activeMetalType == METAL_METEORIC_IRON) {
+            // Tool heads
             if (cast.isOf(ModItems.PICKAXE_HEAD_CAST)) return new ItemStack(ModItems.MI_PICKAXE_HEAD);
             if (cast.isOf(ModItems.AXE_HEAD_CAST)) return new ItemStack(ModItems.MI_AXE_HEAD);
             if (cast.isOf(ModItems.SHOVEL_HEAD_CAST)) return new ItemStack(ModItems.MI_SHOVEL_HEAD);
             if (cast.isOf(ModItems.SWORD_HEAD_CAST)) return new ItemStack(ModItems.MI_SWORD_HEAD);
             if (cast.isOf(ModItems.HOE_HEAD_CAST)) return new ItemStack(ModItems.MI_HOE_HEAD);
             if (cast.isOf(ModItems.SPEAR_HEAD_CAST)) return new ItemStack(ModItems.MI_SPEAR_HEAD);
+            // Armor
+            if (cast.isOf(ModItems.HELMET_CAST)) return new ItemStack(ModItems.METEORIC_IRON_HELMET);
+            if (cast.isOf(ModItems.CHESTPLATE_CAST)) return new ItemStack(ModItems.METEORIC_IRON_CHESTPLATE);
+            if (cast.isOf(ModItems.LEGGINGS_CAST)) return new ItemStack(ModItems.METEORIC_IRON_LEGGINGS);
+            if (cast.isOf(ModItems.BOOTS_CAST)) return new ItemStack(ModItems.METEORIC_IRON_BOOTS);
         }
         return ItemStack.EMPTY;
     }
