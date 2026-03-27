@@ -53,8 +53,14 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     private int maxMeltProgress = FoundryRecipe.DEFAULT_MELT_TIME;
     private int fuelTime = 0;
     private int maxFuelTime = 0;
-    private int metalLevel = 0;
-    private int maxMetalLevel = 1000; //100 = 1 ingot, holds 10 ingots total
+    // Metal type constants
+    public static final int METAL_STEEL = 0;
+    public static final int METAL_METEORIC_IRON = 1;
+
+    private int steelLevel = 0;
+    private int meteoricIronLevel = 0;
+    private int maxMetalLevel = 1000; // 100 = 1 ingot, holds 10 ingots per metal type
+    private int activeMetalType = METAL_STEEL; // selected metal for casting
     private int castProgress = 0;
     private int maxCastProgress = FoundryRecipe.DEFAULT_CAST_TIME;
     private int coolingProgress = 0;
@@ -151,9 +157,8 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
                     case 5 -> maxMetalLevel = value;
                     case 6 -> castProgress = value;
                     case 7 -> maxCastProgress = value;
-                    case 8 -> isCrafting = (value != 0);
-                    case 9 -> coolingProgress = value;
-                    case 10 -> maxCoolingProgress = value;
+                    case 8 -> coolingProgress = value;
+                    case 9 -> maxCoolingProgress = value;
                 }
             }
 
@@ -213,8 +218,8 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
     protected void writeData(WriteView view) {
         super.writeData(view);
         Inventories.writeData(view, inventory);
-        view.putInt("melt_progress", meltProgress);
-        view.putInt("max_melt_progress", maxMeltProgress);
+        view.putInt("progress", meltProgress);
+        view.putInt("max_progress", maxMeltProgress);
         view.putInt("fuel_time", fuelTime);
         view.putInt("max_fuel_time", maxFuelTime);
         view.putInt("metal_level", metalLevel);
@@ -304,7 +309,7 @@ public class FoundryBlockEntity extends BlockEntity implements ExtendedScreenHan
             dirty = true;
         } else {
             if (meltProgress > 0) {
-                meltProgress = Math.max(0, meltProgress - 2); //Cool down
+                meltProgress = Math.max(10, meltProgress - 2); //Cool down
                 dirty = true;
             }
         }
