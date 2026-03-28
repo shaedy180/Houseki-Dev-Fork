@@ -1,6 +1,7 @@
 package anya.pizza.houseki.world.structure;
 
 import anya.pizza.houseki.block.ModBlocks;
+import anya.pizza.houseki.util.ModTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.nbt.NbtCompound;
@@ -29,12 +30,12 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
  */
 public class MeteoriteStructurePiece extends StructurePiece {
     // Size range for the meteorite sphere (in blocks). Diameter will be 2x this.
-    public static final int MIN_RADIUS = 7;
-    public static final int MAX_RADIUS = 11;
+    public static final int MIN_RADIUS = 20;
+    public static final int MAX_RADIUS = 60;
     // How much wider the crater is than the meteorite itself
     private static final int CRATER_EXTRA = 6;
     // How far above the surface we clear blocks (to remove tall trees)
-    private static final int TREE_CLEAR_HEIGHT = 20;
+    private static final int TREE_CLEAR_HEIGHT = 60;
 
     private final int centerX;      // world X of the impact center
     private final int surfaceY;     // Y of the terrain surface at impact
@@ -291,13 +292,8 @@ public class MeteoriteStructurePiece extends StructurePiece {
     }
 
     // Returns true for natural stone variants that don't need to be replaced in crater walls/floor.
-    // Could be improved by using a block tag instead of hardcoded checks.
     private boolean isStoneType(BlockState state) {
-        return state.isOf(Blocks.STONE) || state.isOf(Blocks.COBBLESTONE)
-                || state.isOf(Blocks.DEEPSLATE) || state.isOf(Blocks.COBBLED_DEEPSLATE)
-                || state.isOf(Blocks.GRAVEL) || state.isOf(Blocks.ANDESITE)
-                || state.isOf(Blocks.DIORITE) || state.isOf(Blocks.GRANITE)
-                || state.isOf(Blocks.TUFF);
+        return state.isIn(ModTags.Blocks.METEOR_WONT_REPLACE);
     }
 
     // Checks all 6 neighbors. If any is air (and within the chunk box), the block is "exposed"
@@ -325,15 +321,19 @@ public class MeteoriteStructurePiece extends StructurePiece {
         if (roll < 5) return Blocks.STONE.getDefaultState();
         if (roll < 7) return Blocks.COBBLESTONE.getDefaultState();
         if (roll < 9) return Blocks.GRAVEL.getDefaultState();
+        if (roll < 10) return Blocks.COAL_BLOCK.getDefaultState();
         return Blocks.COBBLED_DEEPSLATE.getDefaultState();
     }
 
     // Weighted random palette for the meteorite shell and rim: 40% stone, 20% cobble, 20% gravel, 20% deepslate
     private BlockState getShellBlock(Random random) {
         int roll = random.nextInt(10);
-        if (roll < 4) return Blocks.STONE.getDefaultState();
-        if (roll < 6) return Blocks.COBBLESTONE.getDefaultState();
-        if (roll < 8) return Blocks.GRAVEL.getDefaultState();
-        return Blocks.DEEPSLATE.getDefaultState();
+        if (roll < 3) return Blocks.REDSTONE_BLOCK.getDefaultState();
+        //if (roll < 3) return Blocks.AIR.getDefaultState();
+        //if (roll < 4) return Blocks.STONE.getDefaultState();
+        //if (roll < 6) return Blocks.COBBLESTONE.getDefaultState();
+        //if (roll < 8) return Blocks.GRAVEL.getDefaultState();
+        //return Blocks.DEEPSLATE.getDefaultState();
+        return Blocks.IRON_BLOCK.getDefaultState();
     }
 }

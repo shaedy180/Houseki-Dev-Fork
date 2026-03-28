@@ -1,0 +1,12 @@
+{
+  "values": [
+    "#minecraft:base_stone_overworld",
+    "#minecraft:coal_ores",
+    "#minecraft:iron_ores",
+    "#minecraft:gold_ores",
+    "houseki:platinum_ore",
+    "houseki:deepslate_platinum_ore",
+    "minecraft:cobblestone",
+    "minecraft:cobbled_deepslate"
+  ]
+}
