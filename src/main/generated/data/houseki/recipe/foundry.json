@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "minecraft:deepslate_bricks",
+    "B": "minecraft:blast_furnace",
+    "S": "houseki:steel"
+  },
+  "pattern": [
+    "#S#",
+    "SBS",
+    "#S#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "houseki:foundry"
+  }
+}

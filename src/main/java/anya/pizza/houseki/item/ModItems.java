@@ -219,12 +219,12 @@ public class ModItems {
     public static final Item METEORIC_IRON_NAUTILUS_ARMOR = registerItem("meteoric_iron_nautilus_armor", setting -> new Item(setting.nautilusArmor(ModArmorMaterials.METEORIC_IRON_MATERIAL).maxCount(1)));
 
     //Casts
-    public static final Item PICKAXE_HEAD_CAST = registerItem("pickaxe_head_cast", Item::new);
-    public static final Item AXE_HEAD_CAST = registerItem("axe_head_cast", Item::new);
-    public static final Item SHOVEL_HEAD_CAST = registerItem("shovel_head_cast", Item::new);
-    public static final Item SWORD_HEAD_CAST = registerItem("sword_head_cast", Item::new);
-    public static final Item HOE_HEAD_CAST = registerItem("hoe_head_cast", Item::new);
-    public static final Item SPEAR_HEAD_CAST = registerItem("spear_head_cast", Item::new);
+    public static final Item PICKAXE_HEAD_CAST = registerItem("pickaxe_head_cast", setting -> new Item(setting.maxCount(1)));
+    public static final Item AXE_HEAD_CAST = registerItem("axe_head_cast", setting -> new Item(setting.maxCount(1)));
+    public static final Item SHOVEL_HEAD_CAST = registerItem("shovel_head_cast", setting -> new Item(setting.maxCount(1)));
+    public static final Item SWORD_HEAD_CAST = registerItem("sword_head_cast", setting -> new Item(setting.maxCount(1)));
+    public static final Item HOE_HEAD_CAST = registerItem("hoe_head_cast", setting -> new Item(setting.maxCount(1)));
+    public static final Item SPEAR_HEAD_CAST = registerItem("spear_head_cast", setting -> new Item(setting.maxCount(1)));
     public static final Item HELMET_CAST = registerItem("helmet_cast", setting -> new Item(setting.recipeRemainder(Items.IRON_HELMET).maxCount(1)));
     public static final Item CHESTPLATE_CAST = registerItem("chestplate_cast", setting -> new Item(setting.recipeRemainder(Items.IRON_CHESTPLATE).maxCount(1)));
     public static final Item LEGGINGS_CAST = registerItem("leggings_cast", setting -> new Item(setting.recipeRemainder(Items.IRON_LEGGINGS).maxCount(1)));

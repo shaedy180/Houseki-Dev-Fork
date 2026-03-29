@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_cast_steel_shovel_head": {
+    "has_meteoric_iron_sword_head": {
       "conditions": {
         "items": [
           {
-            "items": "houseki:cast_steel_shovel_head"
+            "items": "houseki:meteoric_iron_sword_head"
           }
         ]
       },
@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "houseki:cast_steel_shovel"
+        "recipe": "houseki:meteoric_iron_sword"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -31,13 +31,13 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_cast_steel_shovel_head",
+      "has_meteoric_iron_sword_head",
       "has_stick"
     ]
   ],
   "rewards": {
     "recipes": [
-      "houseki:cast_steel_shovel"
+      "houseki:meteoric_iron_sword"
     ]
   }
 }

@@ -1,7 +1,24 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_cast_steel": {
+    "has_cast_steel_spear_head": {
+      "conditions": {
+        "items": [
+          {
+            "items": "houseki:cast_steel_spear_head"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_stick": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:stick"
+          }
+        ]
+      },
       "trigger": "minecraft:inventory_changed"
     },
     "has_the_recipe": {
@@ -14,7 +31,8 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_cast_steel"
+      "has_cast_steel_spear_head",
+      "has_stick"
     ]
   ],
   "rewards": {

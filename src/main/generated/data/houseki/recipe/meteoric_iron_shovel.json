@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "#": "houseki:meteoric_iron_ingot",
-    "S": "minecraft:stick"
+    "#": "houseki:meteoric_iron_shovel_head",
+    "X": "minecraft:stick"
   },
   "pattern": [
-    " # ",
-    " S ",
-    " S "
+    "#",
+    "X",
+    "X"
   ],
   "result": {
     "count": 1,
