@@ -4,6 +4,7 @@ import anya.pizza.houseki.block.ModBlocks;
 import anya.pizza.houseki.util.ModTags;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.minecraft.block.Blocks;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.BlockTags;
 import org.jspecify.annotations.NonNull;
@@ -178,5 +179,16 @@ public class ModBlockTagProvider extends FabricTagProvider.BlockTagProvider {
         valueLookupBuilder(ModTags.Blocks.ENHANCED_DRILL_MINEABLE)
                 .addTag(BlockTags.PICKAXE_MINEABLE)
                 .addOptionalTag(BlockTags.SHOVEL_MINEABLE);
+
+        valueLookupBuilder(ModTags.Blocks.METEOR_WONT_REPLACE)
+                .forceAddTag(BlockTags.BASE_STONE_OVERWORLD)
+                .forceAddTag(BlockTags.COAL_ORES)
+                .forceAddTag(BlockTags.IRON_ORES)
+                .forceAddTag(BlockTags.GOLD_ORES)
+                .forceAddTag(BlockTags.TERRACOTTA)
+                .add(ModBlocks.PLATINUM_ORE)
+                .add(ModBlocks.DEEPSLATE_PLATINUM_ORE)
+                .add(Blocks.COBBLESTONE)
+                .add(Blocks.COBBLED_DEEPSLATE);
     }
 }

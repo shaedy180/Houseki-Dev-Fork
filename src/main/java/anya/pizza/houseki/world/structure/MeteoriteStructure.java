@@ -43,7 +43,7 @@ public class MeteoriteStructure extends Structure {
         }
 
         Random random = context.random();
-        // Pick a random radius between MIN_RADIUS (7) and MAX_RADIUS (11)
+        // Pick a random radius between MIN_RADIUS and MAX_RADIUS
         int radius = MeteoriteStructurePiece.MIN_RADIUS
                 + random.nextInt(MeteoriteStructurePiece.MAX_RADIUS - MeteoriteStructurePiece.MIN_RADIUS + 1);
         // Crater depth scales with radius so bigger meteorites make deeper craters
