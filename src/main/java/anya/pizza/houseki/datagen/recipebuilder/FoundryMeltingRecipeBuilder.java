@@ -84,7 +84,6 @@ public class FoundryMeltingRecipeBuilder implements RecipeBuilder {
      *
      * @return the underlying Item from the recipe's output ItemStack
      */
-    @Override
     public Item getResult() {
         return output.asItem();
     }

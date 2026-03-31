@@ -2,7 +2,6 @@ package anya.pizza.houseki.world.structure;
 
 import anya.pizza.houseki.block.ModBlocks;
 import anya.pizza.houseki.util.ModTags;
-import net.minecraft.core.BlockBox;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.FluidTags;
@@ -141,7 +140,7 @@ public class MeteoriteStructurePiece extends StructurePiece {
 
                 int bx = centerX + dx;
                 int bz = centerZ + dz;
-                int actualSurfaceY = level.getMaxY(Heightmap.Types.WORLD_SURFACE, bx, bz);
+                int actualSurfaceY = level.getHeight(Heightmap.Types.WORLD_SURFACE, bx, bz);
                 int topClearY = Math.max(actualSurfaceY, surfaceY) + TREE_CLEAR_HEIGHT;
                 int craterFloorY = getCraterFloorY(horizDist, craterRadius);
 
@@ -151,24 +150,24 @@ public class MeteoriteStructurePiece extends StructurePiece {
                     // Clear everything from high above (trees!) down to crater floor
                     for (int y = topClearY; y >= craterFloorY; y--) {
                         BlockPos pos = new BlockPos(bx, y, bz);
-                        if (!chunkBox.contains(pos)) continue;
-                        BlockState state = world.getBlockState(pos);
-                        if (state.isOf(Blocks.BEDROCK)) continue;
+                        if (!chunkBox.isInside(pos)) continue;
+                        BlockState state = level.getBlockState(pos);
+                        if (state.is(Blocks.BEDROCK)) continue;
                         if (!state.isAir()) {
-                            world.setBlockState(pos, Blocks.AIR.getDefaultState(), 2);
+                            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
                         }
                     }
 
                     // Line the crater floor (1-2 blocks deep) with scorched material
                     for (int depth = 0; depth < 2; depth++) {
                         BlockPos floorPos = new BlockPos(bx, craterFloorY - 1 - depth, bz);
-                        if (!chunkBox.contains(floorPos)) continue;
-                        BlockState existing = world.getBlockState(floorPos);
-                        if (existing.isOf(Blocks.BEDROCK)) continue;
+                        if (!chunkBox.isInside(floorPos)) continue;
+                        BlockState existing = level.getBlockState(floorPos);
+                        if (existing.is(Blocks.BEDROCK)) continue;
                         if (!existing.isAir()) {
                             // Replace dirt, sand, grass, etc. with crater material
                             if (!meteorWontReplace(existing)) {
-                                world.setBlockState(floorPos, getCraterLiner(random), 2);
+                                level.setBlock(floorPos, getCraterLiner(random), 2);
                             }
                         }
                     }
@@ -176,10 +175,10 @@ public class MeteoriteStructurePiece extends StructurePiece {
                     // Near-rim: clear trees and vegetation above terrain
                     for (int y = topClearY; y > actualSurfaceY; y--) {
                         BlockPos pos = new BlockPos(bx, y, bz);
-                        if (!chunkBox.contains(pos)) continue;
-                        BlockState state = world.getBlockState(pos);
-                        if (!state.isAir() && !state.isOf(Blocks.BEDROCK)) {
-                            world.setBlockState(pos, Blocks.AIR.getDefaultState(), 2);
+                        if (!chunkBox.isInside(pos)) continue;
+                        BlockState state = level.getBlockState(pos);
+                        if (!state.isAir() && !state.is(Blocks.BEDROCK)) {
+                            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
                         }
                     }
                 }
@@ -199,14 +198,14 @@ public class MeteoriteStructurePiece extends StructurePiece {
                 // Scan the wall: from crater floor up to where it meets terrain
                 for (int y = craterFloorY - 1; y <= surfaceY; y++) {
                     BlockPos pos = new BlockPos(bx, y, bz);
-                    if (!chunkBox.contains(pos)) continue;
-                    BlockState state = world.getBlockState(pos);
-                    if (state.isAir() || state.isOf(Blocks.BEDROCK)) continue;
+                    if (!chunkBox.isInside(pos)) continue;
+                    BlockState state = level.getBlockState(pos);
+                    if (state.isAir() || state.is(Blocks.BEDROCK)) continue;
 
                     // Check if this block is exposed (has air neighbor)
-                    if (isExposedToAir(world, pos, chunkBox)) {
+                    if (isExposedToAir(level, pos, chunkBox)) {
                         if (!meteorWontReplace(state)) {
-                            world.setBlockState(pos, getCraterLiner(random), 2);
+                            level.setBlock(pos, getCraterLiner(random), 2);
                         }
                     }
                 }
@@ -229,15 +228,15 @@ public class MeteoriteStructurePiece extends StructurePiece {
                     double noisyDist = dist + noise;
                     if (noisyDist > meteorRadius) continue;
 
-                    BlockPos pos = meteorCenter.add(dx, dy, dz);
-                    if (!chunkBox.contains(pos)) continue;
-                    BlockState existing = world.getBlockState(pos);
-                    if (existing.isOf(Blocks.BEDROCK)) continue;
+                    BlockPos pos = meteorCenter.offset(dx, dy, dz);
+                    if (!chunkBox.isInside(pos)) continue;
+                    BlockState existing = level.getBlockState(pos);
+                    if (existing.is(Blocks.BEDROCK)) continue;
 
                     if (noisyDist <= coreRadius) {
-                        world.setBlockState(pos, ModBlocks.METEORIC_IRON.getDefaultState(), 2);
+                        level.setBlock(pos, ModBlocks.METEORIC_IRON.defaultBlockState(), 2);
                     } else {
-                        world.setBlockState(pos, shellBlock, 2);
+                        level.setBlock(pos, shellBlock, 2);
                     }
                 }
             }
@@ -256,9 +255,9 @@ public class MeteoriteStructurePiece extends StructurePiece {
             if (craterFloorY >= surfaceY - 1) continue;
 
             BlockPos debrisPos = new BlockPos(centerX + dx, craterFloorY, centerZ + dz);
-            if (!chunkBox.contains(debrisPos)) continue;
-            if (world.getBlockState(debrisPos).isAir()) {
-                world.setBlockState(debrisPos, ModBlocks.METEORIC_IRON.getDefaultState(), 2);
+            if (!chunkBox.isInside(debrisPos)) continue;
+            if (level.getBlockState(debrisPos).isAir()) {
+                level.setBlock(debrisPos, ModBlocks.METEORIC_IRON.defaultBlockState(), 2);
             }
         }
 
@@ -274,23 +273,23 @@ public class MeteoriteStructurePiece extends StructurePiece {
 
                 int bx = centerX + dx;
                 int bz = centerZ + dz;
-                int actualY = world.getTopY(Heightmap.Type.WORLD_SURFACE, bx, bz);
+                int actualY = level.getHeight(Heightmap.Types.WORLD_SURFACE, bx, bz);
 
                 // Replace surface block with rim material
                 BlockPos rimPos = new BlockPos(bx, actualY - 1, bz);
-                if (chunkBox.contains(rimPos)) {
-                    BlockState rimState = world.getBlockState(rimPos);
-                    if (!rimState.isAir() && !rimState.isOf(Blocks.BEDROCK)
-                            && !rimState.getFluidState().isIn(FluidTags.WATER)) {
-                        world.setBlockState(rimPos, rimBlock, 2);
+                if (chunkBox.isInside(rimPos)) {
+                    BlockState rimState = level.getBlockState(rimPos);
+                    if (!rimState.isAir() && !rimState.is(Blocks.BEDROCK)
+                            && !rimState.getFluidState().is(FluidTags.WATER)) {
+                        level.setBlock(rimPos, rimBlock, 2);
                     }
                 }
 
                 // Raised rim blocks
                 if (rimRoll == 0 && horizDist >= craterRadius - 1 && horizDist <= craterRadius + 0.5) {
                     BlockPos aboveRim = new BlockPos(bx, actualY, bz);
-                    if (chunkBox.contains(aboveRim) && world.getBlockState(aboveRim).isAir()) {
-                        world.setBlockState(aboveRim, raisedBlock, 2);
+                    if (chunkBox.isInside(aboveRim) && level.getBlockState(aboveRim).isAir()) {
+                        level.setBlock(aboveRim, raisedBlock, 2);
                     }
                 }
             }
@@ -298,22 +297,22 @@ public class MeteoriteStructurePiece extends StructurePiece {
     }
 
     private boolean meteorWontReplace(BlockState state) {
-        return state.isIn(ModTags.Blocks.METEOR_WONT_REPLACE);
+        return state.is(ModTags.Blocks.METEOR_WONT_REPLACE);
     }
 
     // Checks all 6 neighbors. If any is air (and within the chunk box), the block is "exposed"
     // and should be lined with crater material in Phase 2.
-    private boolean isExposedToAir(StructureWorldAccess world, BlockPos pos, BlockBox box) {
+    private boolean isExposedToAir(WorldGenLevel world, BlockPos pos, BoundingBox box) {
         for (int i = 0; i < 6; i++) {
             BlockPos neighbor = switch (i) {
-                case 0 -> pos.up();
-                case 1 -> pos.down();
+                case 0 -> pos.above();
+                case 1 -> pos.below();
                 case 2 -> pos.north();
                 case 3 -> pos.south();
                 case 4 -> pos.east();
                 default -> pos.west();
             };
-            if (box.contains(neighbor) && world.getBlockState(neighbor).isAir()) {
+            if (box.isInside(neighbor) && world.getBlockState(neighbor).isAir()) {
                 return true;
             }
         }
@@ -323,32 +322,32 @@ public class MeteoriteStructurePiece extends StructurePiece {
     // Weighted random palette for crater floors and walls
     private BlockState getCraterLiner(Random random) {
         int roll = random.nextInt(11);
-        if (roll < 5) return Blocks.STONE.getDefaultState();
-        if (roll < 7) return Blocks.COBBLESTONE.getDefaultState();
-        if (roll < 8) return Blocks.MAGMA_BLOCK.getDefaultState();
-        if (roll < 9) return Blocks.COBBLED_DEEPSLATE.getDefaultState();
-        if (roll < 10) return Blocks.COAL_BLOCK.getDefaultState();
-        return Blocks.GRAVEL.getDefaultState();
+        if (roll < 5) return Blocks.STONE.defaultBlockState();
+        if (roll < 7) return Blocks.COBBLESTONE.defaultBlockState();
+        if (roll < 8) return Blocks.MAGMA_BLOCK.defaultBlockState();
+        if (roll < 9) return Blocks.COBBLED_DEEPSLATE.defaultBlockState();
+        if (roll < 10) return Blocks.COAL_BLOCK.defaultBlockState();
+        return Blocks.GRAVEL.defaultBlockState();
     }
 
     // Weighted random palette for the meteorite shell
     private BlockState getShellBlock(Random random) {
         int roll = random.nextInt(11);
-        if (roll < 4) return Blocks.COBBLED_DEEPSLATE.getDefaultState();
-        if (roll < 6) return Blocks.COBBLESTONE.getDefaultState();
-        if (roll < 8) return Blocks.MAGMA_BLOCK.getDefaultState();
-        if (roll < 10) return Blocks.COAL_BLOCK.getDefaultState();
-        return Blocks.OBSIDIAN.getDefaultState();
+        if (roll < 4) return Blocks.COBBLED_DEEPSLATE.defaultBlockState();
+        if (roll < 6) return Blocks.COBBLESTONE.defaultBlockState();
+        if (roll < 8) return Blocks.MAGMA_BLOCK.defaultBlockState();
+        if (roll < 10) return Blocks.COAL_BLOCK.defaultBlockState();
+        return Blocks.OBSIDIAN.defaultBlockState();
     }
 
     private BlockState getEjectaRim(Random random) {
         int roll = random.nextInt(11);
-        if (roll < 3) return Blocks.COBBLED_DEEPSLATE.getDefaultState();
-        if (roll < 4) return Blocks.GRAVEL.getDefaultState();
-        if (roll < 5) return Blocks.DIRT.getDefaultState();
-        if (roll < 6) return Blocks.COBBLESTONE.getDefaultState();
-        if (roll < 8) return Blocks.STONE.getDefaultState();
-        if (roll < 10) return Blocks.COAL_BLOCK.getDefaultState();
-        return Blocks.OBSIDIAN.getDefaultState();
+        if (roll < 3) return Blocks.COBBLED_DEEPSLATE.defaultBlockState();
+        if (roll < 4) return Blocks.GRAVEL.defaultBlockState();
+        if (roll < 5) return Blocks.DIRT.defaultBlockState();
+        if (roll < 6) return Blocks.COBBLESTONE.defaultBlockState();
+        if (roll < 8) return Blocks.STONE.defaultBlockState();
+        if (roll < 10) return Blocks.COAL_BLOCK.defaultBlockState();
+        return Blocks.OBSIDIAN.defaultBlockState();
     }
 }
