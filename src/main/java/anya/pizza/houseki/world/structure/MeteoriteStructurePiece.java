@@ -75,7 +75,7 @@ public class MeteoriteStructurePiece extends StructurePiece {
     // Horizontal: meteorite + crater + small buffer for the ejecta rim.
     // Vertical: deep enough for the sphere at crater bottom, high enough to clear trees.
     private static BoundingBox makeBounds(int cx, int sy, int cz, int r, int depth) {
-        int extent = r + CRATER_EXTRA + 3;
+        int extent = r + CRATER_EXTRA + 6;
         return new BoundingBox(cx - extent, sy - depth - r - 2, cz - extent,
                 cx + extent, sy + TREE_CLEAR_HEIGHT, cz + extent);
     }
@@ -180,6 +180,31 @@ public class MeteoriteStructurePiece extends StructurePiece {
                         if (!state.isAir() && !state.is(Blocks.BEDROCK)) {
                             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
                         }
+                    }
+                }
+            }
+        }
+
+        // Phase 1.5: Remove floating vines left after tree clearing
+        // In jungle biomes, vines attached to cleared trees are left hanging in mid-air.
+        // Top-to-bottom scan so vine chains collapse correctly in a single pass.
+        int vineRadius = craterRadius + 5;
+        for (int dx = -vineRadius; dx <= vineRadius; dx++) {
+            for (int dz = -vineRadius; dz <= vineRadius; dz++) {
+                double horizDist = Math.sqrt(dx * dx + dz * dz);
+                if (horizDist > vineRadius) continue;
+
+                int bx = centerX + dx;
+                int bz = centerZ + dz;
+                int topY = Math.max(level.getHeight(Heightmap.Types.WORLD_SURFACE, bx, bz), surfaceY) + TREE_CLEAR_HEIGHT;
+                int bottomY = surfaceY - craterDepth - meteorRadius;
+
+                for (int y = topY; y >= bottomY; y--) {
+                    BlockPos pos = new BlockPos(bx, y, bz);
+                    if (!chunkBox.isInside(pos)) continue;
+                    BlockState state = level.getBlockState(pos);
+                    if (state.is(Blocks.VINE) && !hasVineSupport(level, pos)) {
+                        level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
                     }
                 }
             }
@@ -294,6 +319,18 @@ public class MeteoriteStructurePiece extends StructurePiece {
                 }
             }
         }
+    }
+
+    // A vine is supported if it has a solid (non-air, non-vine) block on any
+    // horizontal side, or any non-air block directly above (vine chain or solid).
+    // During a top-to-bottom scan, already-removed vines above read as air,
+    // so unsupported chains collapse correctly in one pass.
+    private boolean hasVineSupport(WorldGenLevel level, BlockPos pos) {
+        for (BlockPos neighbor : new BlockPos[]{pos.north(), pos.south(), pos.east(), pos.west()}) {
+            BlockState s = level.getBlockState(neighbor);
+            if (!s.isAir() && !s.is(Blocks.VINE)) return true;
+        }
+        return !level.getBlockState(pos.above()).isAir();
     }
 
     private boolean meteorWontReplace(BlockState state) {
