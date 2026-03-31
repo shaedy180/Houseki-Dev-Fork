@@ -1,0 +1,66 @@
+name: release
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: validate gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: setup jdk
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'microsoft'
+
+      - name: setup gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: build
+        run: ./gradlew build
+
+      - name: get mod version
+        id: mod_version
+        run: |
+          version=$(grep '^mod_version=' gradle.properties | cut -d= -f2)
+          branch="${GITHUB_REF_NAME//\//-}"
+          short_sha="${GITHUB_SHA::7}"
+          echo "tag=${version}+${branch}.${short_sha}" >> "$GITHUB_OUTPUT"
+          echo "name=Houseki ${version} (${branch})" >> "$GITHUB_OUTPUT"
+
+      - name: delete existing tag if present
+        run: |
+          git tag -d "${{ steps.mod_version.outputs.tag }}" 2>/dev/null || true
+          git push origin ":refs/tags/${{ steps.mod_version.outputs.tag }}" 2>/dev/null || true
+
+      - name: create tag
+        run: |
+          git tag "${{ steps.mod_version.outputs.tag }}"
+          git push origin "${{ steps.mod_version.outputs.tag }}"
+
+      - name: publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.mod_version.outputs.tag }}
+          name: ${{ steps.mod_version.outputs.name }}
+          files: build/libs/*.jar
+          fail_on_unmatched_files: true
+          generate_release_notes: false
+          prerelease: true
+          body: |
+            Auto-release from `${{ github.ref_name }}` branch.
+            Commit: ${{ github.sha }}
