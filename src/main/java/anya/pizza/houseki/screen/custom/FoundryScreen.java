@@ -27,8 +27,8 @@ public class FoundryScreen extends AbstractContainerScreen<FoundryScreenHandler>
     @Override
     protected void init() {
         super.init();
-        titleLabelX = 80;
-        titleLabelY = -4;
+        titleLabelX = (imageWidth - font.width(title)) / 2;
+        titleLabelY = 6;
         inventoryLabelY = imageHeight - 104;
     }
 
