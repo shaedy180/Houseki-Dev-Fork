@@ -3,12 +3,15 @@ package anya.pizza.houseki.world.structure;
 import anya.pizza.houseki.block.ModBlocks;
 import anya.pizza.houseki.util.ModTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -39,6 +42,13 @@ public class MeteoriteStructurePiece extends StructurePiece {
     private static final int CRATER_EXTRA = 25;
     // How far above the surface we clear blocks (to remove tall trees)
     private static final int TREE_CLEAR_HEIGHT = 60;
+
+    // Biome-specific visual variants for the meteor. Core blocks (METEORIC_IRON) and
+    // iron distribution stay the same across all variants; only the surrounding
+    // shell, crater lining, and ejecta rim adapt to the local biome.
+    private enum BiomeVariant {
+        DEFAULT, DESERT, MANGROVE, SNOWY
+    }
 
     private final int centerX;      // world X of the impact center
     private final int surfaceY;     // Y of the terrain surface at impact
@@ -102,6 +112,29 @@ public class MeteoriteStructurePiece extends StructurePiece {
     }
 
     /**
+     * Determines the visual variant based on the biome at the meteor center.
+     * Only affects crater lining, meteorite shell, and ejecta rim blocks.
+     * Core blocks (METEORIC_IRON) and debris are unchanged.
+     */
+    private BiomeVariant determineBiomeVariant(WorldGenLevel level) {
+        Holder<Biome> biome = level.getBiome(new BlockPos(centerX, surfaceY, centerZ));
+
+        if (biome.is(Biomes.DESERT)) {
+            return BiomeVariant.DESERT;
+        }
+        if (biome.is(Biomes.MANGROVE_SWAMP) || biome.is(Biomes.SWAMP)) {
+            return BiomeVariant.MANGROVE;
+        }
+        if (biome.is(Biomes.SNOWY_PLAINS) || biome.is(Biomes.SNOWY_TAIGA)
+                || biome.is(Biomes.SNOWY_BEACH) || biome.is(Biomes.SNOWY_SLOPES)
+                || biome.is(Biomes.FROZEN_PEAKS) || biome.is(Biomes.ICE_SPIKES)
+                || biome.is(Biomes.GROVE)) {
+            return BiomeVariant.SNOWY;
+        }
+        return BiomeVariant.DEFAULT;
+    }
+
+    /**
      * Main generation method. Called once per chunk that overlaps this piece's bounding box.
      * Uses a deterministic seed so the output is identical regardless of chunk load order.
      *
@@ -122,6 +155,7 @@ public class MeteoriteStructurePiece extends StructurePiece {
         int settleAmount = 5;
         int meteorCenterY = (surfaceY - craterDepth) + meteorRadius - settleAmount;
         BlockPos meteorCenter = new BlockPos(centerX, meteorCenterY, centerZ);
+        BiomeVariant variant = determineBiomeVariant(level);
 
         // Bail out if the center is in water or lava - meteorites in oceans look bad
         BlockPos surfacePos = new BlockPos(centerX, surfaceY - 1, centerZ);
@@ -167,7 +201,7 @@ public class MeteoriteStructurePiece extends StructurePiece {
                         if (!existing.isAir()) {
                             // Replace dirt, sand, grass, etc. with crater material
                             if (!meteorWontReplace(existing)) {
-                                level.setBlock(floorPos, getCraterLiner(random), 2);
+                                level.setBlock(floorPos, getCraterLiner(random, variant), 2);
                             }
                         }
                     }
@@ -231,7 +265,7 @@ public class MeteoriteStructurePiece extends StructurePiece {
                     // Check if this block is exposed (has air neighbor)
                     if (isExposedToAir(level, pos, chunkBox)) {
                         if (!meteorWontReplace(state)) {
-                            level.setBlock(pos, getCraterLiner(random), 2);
+                            level.setBlock(pos, getCraterLiner(random, variant), 2);
                         }
                     }
                 }
@@ -249,7 +283,7 @@ public class MeteoriteStructurePiece extends StructurePiece {
                     if (dist > meteorRadius + 0.5) continue;
 
                     double noise = (random.nextDouble() - 0.5) * 0.8;
-                    BlockState shellBlock = getShellBlock(random);
+                    BlockState shellBlock = getShellBlock(random, variant);
 
                     double noisyDist = dist + noise;
                     if (noisyDist > meteorRadius) continue;
@@ -293,9 +327,9 @@ public class MeteoriteStructurePiece extends StructurePiece {
                 double horizDist = Math.sqrt(dx * dx + dz * dz);
                 if (horizDist < craterRadius - 2.5 || horizDist > craterRadius + 2) continue;
 
-                BlockState rimBlock = getEjectaRim(random);
+                BlockState rimBlock = getEjectaRim(random, variant);
                 int rimRoll = random.nextInt(3);
-                BlockState raisedBlock = getEjectaRim(random);
+                BlockState raisedBlock = getEjectaRim(random, variant);
 
                 int bx = centerX + dx;
                 int bz = centerZ + dz;
@@ -357,35 +391,123 @@ public class MeteoriteStructurePiece extends StructurePiece {
         return false;
     }
 
-    // Weighted random palette for crater floors and walls
-    private BlockState getCraterLiner(Random random) {
+    // Weighted random palette for crater floors and walls, adapted to biome variant.
+    private BlockState getCraterLiner(Random random, BiomeVariant variant) {
         int roll = random.nextInt(11);
-        if (roll < 5) return Blocks.STONE.defaultBlockState();
-        if (roll < 7) return Blocks.COBBLESTONE.defaultBlockState();
-        if (roll < 8) return Blocks.MAGMA_BLOCK.defaultBlockState();
-        if (roll < 9) return Blocks.COBBLED_DEEPSLATE.defaultBlockState();
-        if (roll < 10) return Blocks.COAL_BLOCK.defaultBlockState();
-        return Blocks.GRAVEL.defaultBlockState();
+        return switch (variant) {
+            case DESERT -> {
+                if (roll < 5) yield Blocks.SANDSTONE.defaultBlockState();
+                if (roll < 7) yield Blocks.SMOOTH_SANDSTONE.defaultBlockState();
+                if (roll < 8) yield Blocks.MAGMA_BLOCK.defaultBlockState();
+                if (roll < 9) yield Blocks.TERRACOTTA.defaultBlockState();
+                if (roll < 10) yield Blocks.COAL_BLOCK.defaultBlockState();
+                yield Blocks.RED_SANDSTONE.defaultBlockState();
+            }
+            case MANGROVE -> {
+                if (roll < 5) yield Blocks.MUD.defaultBlockState();
+                if (roll < 7) yield Blocks.PACKED_MUD.defaultBlockState();
+                if (roll < 8) yield Blocks.MAGMA_BLOCK.defaultBlockState();
+                if (roll < 9) yield Blocks.CLAY.defaultBlockState();
+                if (roll < 10) yield Blocks.COAL_BLOCK.defaultBlockState();
+                yield Blocks.MUDDY_MANGROVE_ROOTS.defaultBlockState();
+            }
+            case SNOWY -> {
+                if (roll < 4) yield Blocks.SNOW_BLOCK.defaultBlockState();
+                if (roll < 6) yield Blocks.PACKED_ICE.defaultBlockState();
+                if (roll < 8) yield Blocks.STONE.defaultBlockState();
+                if (roll < 9) yield Blocks.MAGMA_BLOCK.defaultBlockState();
+                if (roll < 10) yield Blocks.COAL_BLOCK.defaultBlockState();
+                yield Blocks.GRAVEL.defaultBlockState();
+            }
+            default -> {
+                if (roll < 5) yield Blocks.STONE.defaultBlockState();
+                if (roll < 7) yield Blocks.COBBLESTONE.defaultBlockState();
+                if (roll < 8) yield Blocks.MAGMA_BLOCK.defaultBlockState();
+                if (roll < 9) yield Blocks.COBBLED_DEEPSLATE.defaultBlockState();
+                if (roll < 10) yield Blocks.COAL_BLOCK.defaultBlockState();
+                yield Blocks.GRAVEL.defaultBlockState();
+            }
+        };
     }
 
-    // Weighted random palette for the meteorite shell
-    private BlockState getShellBlock(Random random) {
+    // Weighted random palette for the meteorite shell, adapted to biome variant.
+    // Core blocks (METEORIC_IRON) are unaffected; only the outer shell changes.
+    private BlockState getShellBlock(Random random, BiomeVariant variant) {
         int roll = random.nextInt(11);
-        if (roll < 4) return Blocks.COBBLED_DEEPSLATE.defaultBlockState();
-        if (roll < 6) return Blocks.COBBLESTONE.defaultBlockState();
-        if (roll < 8) return Blocks.MAGMA_BLOCK.defaultBlockState();
-        if (roll < 10) return Blocks.COAL_BLOCK.defaultBlockState();
-        return Blocks.OBSIDIAN.defaultBlockState();
+        return switch (variant) {
+            case DESERT -> {
+                if (roll < 3) yield Blocks.SANDSTONE.defaultBlockState();
+                if (roll < 5) yield Blocks.SMOOTH_SANDSTONE.defaultBlockState();
+                if (roll < 7) yield Blocks.MAGMA_BLOCK.defaultBlockState();
+                if (roll < 9) yield Blocks.COAL_BLOCK.defaultBlockState();
+                if (roll < 10) yield Blocks.TERRACOTTA.defaultBlockState();
+                yield Blocks.OBSIDIAN.defaultBlockState();
+            }
+            case MANGROVE -> {
+                if (roll < 3) yield Blocks.PACKED_MUD.defaultBlockState();
+                if (roll < 5) yield Blocks.COBBLED_DEEPSLATE.defaultBlockState();
+                if (roll < 7) yield Blocks.MAGMA_BLOCK.defaultBlockState();
+                if (roll < 9) yield Blocks.COAL_BLOCK.defaultBlockState();
+                if (roll < 10) yield Blocks.MUD.defaultBlockState();
+                yield Blocks.OBSIDIAN.defaultBlockState();
+            }
+            case SNOWY -> {
+                if (roll < 3) yield Blocks.PACKED_ICE.defaultBlockState();
+                if (roll < 5) yield Blocks.COBBLED_DEEPSLATE.defaultBlockState();
+                if (roll < 7) yield Blocks.MAGMA_BLOCK.defaultBlockState();
+                if (roll < 9) yield Blocks.COAL_BLOCK.defaultBlockState();
+                if (roll < 10) yield Blocks.BLUE_ICE.defaultBlockState();
+                yield Blocks.OBSIDIAN.defaultBlockState();
+            }
+            default -> {
+                if (roll < 4) yield Blocks.COBBLED_DEEPSLATE.defaultBlockState();
+                if (roll < 6) yield Blocks.COBBLESTONE.defaultBlockState();
+                if (roll < 8) yield Blocks.MAGMA_BLOCK.defaultBlockState();
+                if (roll < 10) yield Blocks.COAL_BLOCK.defaultBlockState();
+                yield Blocks.OBSIDIAN.defaultBlockState();
+            }
+        };
     }
 
-    private BlockState getEjectaRim(Random random) {
+    // Weighted random palette for the ejecta rim around the crater, adapted to biome variant.
+    private BlockState getEjectaRim(Random random, BiomeVariant variant) {
         int roll = random.nextInt(11);
-        if (roll < 3) return Blocks.COBBLED_DEEPSLATE.defaultBlockState();
-        if (roll < 4) return Blocks.GRAVEL.defaultBlockState();
-        if (roll < 5) return Blocks.DIRT.defaultBlockState();
-        if (roll < 6) return Blocks.COBBLESTONE.defaultBlockState();
-        if (roll < 8) return Blocks.STONE.defaultBlockState();
-        if (roll < 10) return Blocks.COAL_BLOCK.defaultBlockState();
-        return Blocks.OBSIDIAN.defaultBlockState();
+        return switch (variant) {
+            case DESERT -> {
+                if (roll < 3) yield Blocks.TERRACOTTA.defaultBlockState();
+                if (roll < 4) yield Blocks.RED_SANDSTONE.defaultBlockState();
+                if (roll < 5) yield Blocks.SANDSTONE.defaultBlockState();
+                if (roll < 6) yield Blocks.SMOOTH_SANDSTONE.defaultBlockState();
+                if (roll < 8) yield Blocks.CUT_SANDSTONE.defaultBlockState();
+                if (roll < 10) yield Blocks.COAL_BLOCK.defaultBlockState();
+                yield Blocks.OBSIDIAN.defaultBlockState();
+            }
+            case MANGROVE -> {
+                if (roll < 3) yield Blocks.MUD.defaultBlockState();
+                if (roll < 4) yield Blocks.PACKED_MUD.defaultBlockState();
+                if (roll < 5) yield Blocks.CLAY.defaultBlockState();
+                if (roll < 6) yield Blocks.MUDDY_MANGROVE_ROOTS.defaultBlockState();
+                if (roll < 8) yield Blocks.MOSS_BLOCK.defaultBlockState();
+                if (roll < 10) yield Blocks.COAL_BLOCK.defaultBlockState();
+                yield Blocks.OBSIDIAN.defaultBlockState();
+            }
+            case SNOWY -> {
+                if (roll < 3) yield Blocks.SNOW_BLOCK.defaultBlockState();
+                if (roll < 5) yield Blocks.PACKED_ICE.defaultBlockState();
+                if (roll < 7) yield Blocks.STONE.defaultBlockState();
+                if (roll < 8) yield Blocks.COBBLESTONE.defaultBlockState();
+                if (roll < 10) yield Blocks.COAL_BLOCK.defaultBlockState();
+                yield Blocks.OBSIDIAN.defaultBlockState();
+            }
+            default -> {
+                if (roll < 3) yield Blocks.COBBLED_DEEPSLATE.defaultBlockState();
+                if (roll < 4) yield Blocks.GRAVEL.defaultBlockState();
+                if (roll < 5) yield Blocks.DIRT.defaultBlockState();
+                if (roll < 6) yield Blocks.COBBLESTONE.defaultBlockState();
+                if (roll < 8) yield Blocks.STONE.defaultBlockState();
+                if (roll < 10) yield Blocks.COAL_BLOCK.defaultBlockState();
+                yield Blocks.OBSIDIAN.defaultBlockState();
+            }
+        };
     }
 }
