@@ -323,5 +323,9 @@
   "advancements.houseki.pinku.title": "The Power of Pinku!",
   "advancements.houseki.pinku.description": "Acquire Pinku!",
   "advancements.houseki.crusher_crafting.title": "It's Crushing Time!",
-  "advancements.houseki.crusher_crafting.description": "Crafted a crusher!"
+  "advancements.houseki.crusher_crafting.description": "Crafted a Crusher!",
+  "advancements.houseki.foundry_crafting.title": "Melting and Casting",
+  "advancements.houseki.foundry_crafting.description": "Crafted a Foundry!",
+  "advancements.houseki.meteorite.title": "Space Rock",
+  "advancements.houseki.meteorite.description": "Found a Meteorite!"
 }
