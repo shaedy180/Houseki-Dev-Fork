@@ -6,11 +6,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
-import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
-import org.spongepowered.asm.mixin.transformer.Config;
 
 import java.util.Optional;
-import java.util.Random;
 
 /**
  * High-level structure class for the meteorite. Decides whether a meteorite should spawn
@@ -19,9 +16,9 @@ import java.util.Random;
  */
 public class MeteoriteStructure extends Structure {
     // Codec for JSON serialization. No custom fields, so we just wrap the base Structure config.
-    public static final MapCodec<MeteoriteStructure> CODEC = createCodec(MeteoriteStructure::new);
+    public static final MapCodec<MeteoriteStructure> CODEC = simpleCodec(MeteoriteStructure::new);
 
-    public MeteoriteStructure(Config config) {
+    public MeteoriteStructure(StructureSettings config) {
         super(config);
     }
 
