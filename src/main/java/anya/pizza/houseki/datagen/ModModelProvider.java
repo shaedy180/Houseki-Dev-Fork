@@ -169,10 +169,13 @@ public class ModModelProvider extends FabricModelProvider {
         itemModelGenerator.generateFlatItem(ModItems.CAST_STEEL_SWORD, ModelTemplates.FLAT_HANDHELD_ITEM);
         itemModelGenerator.generateFlatItem(ModItems.CAST_STEEL_HOE, ModelTemplates.FLAT_HANDHELD_ITEM);
         itemModelGenerator.generateFlatItem(ModItems.CAST_STEEL_SPEAR, ModelTemplates.FLAT_HANDHELD_ITEM);
-        itemModelGenerator.generateFlatItem(ModItems.METEORIC_IRON_HELMET, ModelTemplates.FLAT_HANDHELD_ITEM);
-        itemModelGenerator.generateFlatItem(ModItems.METEORIC_IRON_CHESTPLATE, ModelTemplates.FLAT_HANDHELD_ITEM);
-        itemModelGenerator.generateFlatItem(ModItems.METEORIC_IRON_LEGGINGS, ModelTemplates.FLAT_HANDHELD_ITEM);
-        itemModelGenerator.generateFlatItem(ModItems.METEORIC_IRON_BOOTS, ModelTemplates.FLAT_HANDHELD_ITEM);
+        itemModelGenerator.generateFlatItem(ModItems.METEORIC_IRON_PICKAXE, ModelTemplates.FLAT_HANDHELD_ITEM);
+        itemModelGenerator.generateFlatItem(ModItems.METEORIC_IRON_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);
+        itemModelGenerator.generateFlatItem(ModItems.METEORIC_IRON_SHOVEL, ModelTemplates.FLAT_HANDHELD_ITEM);
+        itemModelGenerator.generateFlatItem(ModItems.METEORIC_IRON_SWORD, ModelTemplates.FLAT_HANDHELD_ITEM);
+        itemModelGenerator.generateFlatItem(ModItems.METEORIC_IRON_HOE, ModelTemplates.FLAT_HANDHELD_ITEM);
+        itemModelGenerator.generateFlatItem(ModItems.METEORIC_IRON_SPEAR, ModelTemplates.FLAT_HANDHELD_ITEM);
+
         itemModelGenerator.generateFlatItem(ModItems.SIMPLE_DIAMOND_DRILL, ModelTemplates.FLAT_HANDHELD_ITEM);
         itemModelGenerator.generateFlatItem(ModItems.ENHANCED_DIAMOND_DRILL, ModelTemplates.FLAT_HANDHELD_ITEM);
         itemModelGenerator.generateFlatItem(ModItems.ADVANCED_DIAMOND_DRILL, ModelTemplates.FLAT_HANDHELD_ITEM);
@@ -214,6 +217,10 @@ public class ModModelProvider extends FabricModelProvider {
         itemModelGenerator.generateTrimmableItem(ModItems.CAST_STEEL_CHESTPLATE, ModArmorMaterials.CAST_STEEL_KEY, ItemModelGenerators.TRIM_PREFIX_CHESTPLATE, false);
         itemModelGenerator.generateTrimmableItem(ModItems.CAST_STEEL_LEGGINGS,  ModArmorMaterials.CAST_STEEL_KEY, ItemModelGenerators.TRIM_PREFIX_LEGGINGS, false);
         itemModelGenerator.generateTrimmableItem(ModItems.CAST_STEEL_BOOTS, ModArmorMaterials.CAST_STEEL_KEY, ItemModelGenerators.TRIM_PREFIX_BOOTS, false);
+        itemModelGenerator.generateTrimmableItem(ModItems.METEORIC_IRON_HELMET, ModArmorMaterials.METEORIC_IRON_KEY, ItemModelGenerators.TRIM_PREFIX_HELMET, false);
+        itemModelGenerator.generateTrimmableItem(ModItems.METEORIC_IRON_CHESTPLATE, ModArmorMaterials.METEORIC_IRON_KEY, ItemModelGenerators.TRIM_PREFIX_CHESTPLATE, false);
+        itemModelGenerator.generateTrimmableItem(ModItems.METEORIC_IRON_LEGGINGS, ModArmorMaterials.METEORIC_IRON_KEY, ItemModelGenerators.TRIM_PREFIX_LEGGINGS, false);
+        itemModelGenerator.generateTrimmableItem(ModItems.METEORIC_IRON_BOOTS, ModArmorMaterials.METEORIC_IRON_KEY, ItemModelGenerators.TRIM_PREFIX_BOOTS, false);
 
         itemModelGenerator.generateFlatItem(ModItems.PINKU_HORSE_ARMOR, ModelTemplates.FLAT_ITEM);
         itemModelGenerator.generateFlatItem(ModItems.RAINBOW_PYRITE_HORSE_ARMOR, ModelTemplates.FLAT_ITEM);

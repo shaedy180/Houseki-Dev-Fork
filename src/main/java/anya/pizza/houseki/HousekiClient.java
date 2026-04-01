@@ -11,12 +11,12 @@ public class HousekiClient implements ClientModInitializer {
     public void onInitializeClient() {
 
         MenuScreens.register(ModScreenHandlers.CRUSHER_SCREEN_HANDLER, CrusherScreen::new);
-        HandledScreens.register(ModScreenHandlers.FOUNDRY_SCREEN_HANDLER, FoundryScreen::new);
+        MenuScreens.register(ModScreenHandlers.FOUNDRY_SCREEN_HANDLER, FoundryScreen::new);
 
-        BlockRenderLayerMap.putBlock(ModBlocks.ALUMINUM_GLASS, BlockRenderLayer.TRANSLUCENT);
-        BlockRenderLayerMap.putBlock(ModBlocks.ALUMINUM_GLASS_PANE, BlockRenderLayer.TRANSLUCENT);
-        BlockRenderLayerMap.putBlock(ModBlocks.ALUMINUM_DOOR, BlockRenderLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(ModBlocks.ALUMINUM_TRAPDOOR, BlockRenderLayer.CUTOUT);
+        //BlockRenderLayerMap.putBlock(ModBlocks.ALUMINUM_GLASS, BlockRenderLayer.TRANSLUCENT);
+        //BlockRenderLayerMap.putBlock(ModBlocks.ALUMINUM_GLASS_PANE, BlockRenderLayer.TRANSLUCENT);
+        //BlockRenderLayerMap.putBlock(ModBlocks.ALUMINUM_DOOR, BlockRenderLayer.CUTOUT);
+        //BlockRenderLayerMap.putBlock(ModBlocks.ALUMINUM_TRAPDOOR, BlockRenderLayer.CUTOUT);
 
     }
 }
