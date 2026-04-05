@@ -65,11 +65,42 @@ public class MeteoriteStructure extends Structure {
         Holder<Biome> biome = context.biomeSource().getNoiseBiome(
                 x >> 2, surfaceY >> 2, z >> 2, sampler);
 
-        // Reject ocean and river biomes outright. Without this, the structure
-        // is registered (visible to /locate) but postProcess skips it silently,
-        // creating ghost entries that players can never find.
-        if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) {
+        // Reject ocean, river, beach and shore biomes outright. Without this,
+        // the structure is registered (visible to /locate) but postProcess skips it
+        // silently, creating ghost entries that players can never find.
+        if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)
+                || biome.is(BiomeTags.IS_BEACH)
+                || biome.is(Biomes.STONY_SHORE)) {
             return Optional.empty();
+        }
+
+        // Check terrain height variance and water presence around the impact site.
+        // Sample center + 8 perimeter points at half the crater radius.
+        // Reject if:
+        //   - any point's height differs by >8 blocks from center (steep terrain)
+        //   - any point has water (WORLD_SURFACE_WG != OCEAN_FLOOR_WG)
+        // This catches inland lakes in any biome that biome tags can't detect.
+        int craterRadius = radius + 25; // same as CRATER_EXTRA in MeteoriteStructurePiece
+        int sampleDist = craterRadius / 2;
+        int[][] offsets = {{0, 0},
+                {sampleDist, 0}, {-sampleDist, 0}, {0, sampleDist}, {0, -sampleDist},
+                {sampleDist, sampleDist}, {sampleDist, -sampleDist}, {-sampleDist, sampleDist}, {-sampleDist, -sampleDist}};
+        for (int[] off : offsets) {
+            int sx = x + off[0];
+            int sz = z + off[1];
+            int sampleSurface = context.chunkGenerator().getBaseHeight(
+                    sx, sz, Heightmap.Types.WORLD_SURFACE_WG,
+                    context.heightAccessor(), context.randomState());
+            int sampleFloor = context.chunkGenerator().getBaseHeight(
+                    sx, sz, Heightmap.Types.OCEAN_FLOOR_WG,
+                    context.heightAccessor(), context.randomState());
+            // Water detected: surface is above the ocean floor
+            if (sampleSurface - sampleFloor > 1) {
+                return Optional.empty();
+            }
+            if (Math.abs(sampleSurface - surfaceY) > 8) {
+                return Optional.empty();
+            }
         }
 
         int biomeVariantId = MeteoriteStructurePiece.resolveBiomeVariantId(biome);
