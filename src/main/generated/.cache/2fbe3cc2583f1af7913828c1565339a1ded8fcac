@@ -137,6 +137,7 @@ da6f16085752dabee869194c609797ee34fee593 assets/houseki/items/enhanced_tungsten_
 4e4b298ca9ca3746a5ea2984b8bb2537a7062083 assets/houseki/items/foundry.json
 34d77468d3e9e69fe5aaf6188784cb35a98b96fc assets/houseki/items/helmet_cast.json
 4d92bf60ff64148bed5185471d72f16f6a314cfc assets/houseki/items/hoe_head_cast.json
+52db6ff9b6889f03bf5064ec96a9cbf095e806dd assets/houseki/items/ingot_cast.json
 a4ee741a67c6b0c46771e9dd1ff690bc9aac6b91 assets/houseki/items/jadeite.json
 0893d095dee282a4e937f9f686c251a5fa067bd9 assets/houseki/items/jadeite_axe.json
 5902eec94a8a548b9498b6619a00200fe8976918 assets/houseki/items/jadeite_boots.json
@@ -558,6 +559,7 @@ f56f3d9543e74ed865cc82887fb72ba0740f44d0 assets/houseki/models/item/enhanced_dri
 22d0c8aff5175ccdf9f2e40711342600f548e18f assets/houseki/models/item/enhanced_tungsten_drill.json
 1f39a6eefdc48c651260054de102b1ed9df23075 assets/houseki/models/item/helmet_cast.json
 045c9ec5a9d08e24d3de5cc05068fc1dbf7bec7c assets/houseki/models/item/hoe_head_cast.json
+983ac6b48add3dad51da7c1357b471fa6af2f409 assets/houseki/models/item/ingot_cast.json
 cbd1081b313a98a434f843d1eda14d6f3c914b21 assets/houseki/models/item/jadeite.json
 476a6193b57289b57f761af222eccedbced1e9b6 assets/houseki/models/item/jadeite_axe.json
 03aa7a3a5ebe615660df33c06b700952e731b596 assets/houseki/models/item/jadeite_boots.json

@@ -155,7 +155,8 @@ public class FoundryScreenHandler extends ScreenHandler {
                         || originalStack.isOf(ModItems.SHOVEL_HEAD_CAST) || originalStack.isOf(ModItems.SWORD_HEAD_CAST)
                         || originalStack.isOf(ModItems.HOE_HEAD_CAST) || originalStack.isOf(ModItems.SPEAR_HEAD_CAST)
                         || originalStack.isOf(ModItems.HELMET_CAST) || originalStack.isOf(ModItems.CHESTPLATE_CAST)
-                        || originalStack.isOf(ModItems.LEGGINGS_CAST) || originalStack.isOf(ModItems.BOOTS_CAST)) {
+                        || originalStack.isOf(ModItems.LEGGINGS_CAST) || originalStack.isOf(ModItems.BOOTS_CAST)
+                        || originalStack.isOf(ModItems.INGOT_CAST)) {
                     if (!this.insertItem(originalStack, 2, 3, false)) {
                         return ItemStack.EMPTY;
                     }
