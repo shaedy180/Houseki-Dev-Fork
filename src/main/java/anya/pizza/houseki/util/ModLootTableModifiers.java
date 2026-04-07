@@ -114,7 +114,16 @@ public class ModLootTableModifiers {
                         .add(LootItem.lootTableItem(ModItems.DRILL_UPGRADE_SMITHING_TEMPLATE).setWeight(1))
                         .add(LootItem.lootTableItem(ModItems.ENHANCED_DRILL_HEAD).setWeight(1))
                         .add(LootItem.lootTableItem(ModItems.DIAMOND_DRILL_BIT).setWeight(1))
-                        .add(TagEntry.tagContents(ModTags.Items.CASTS).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.PICKAXE_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.AXE_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.SHOVEL_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.SWORD_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.HOE_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.HELMET_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.CHESTPLATE_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.LEGGINGS_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.BOOTS_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.INGOT_CAST).setWeight(1))
                         .add(LootItem.lootTableItem(ModItems.BISMUTH).setWeight(1))
                         .add(LootItem.lootTableItem(ModItems.SUGILITE).setWeight(1));
                 tableBuilder.pool(poolBuilder.build());
@@ -260,7 +269,16 @@ public class ModLootTableModifiers {
                                 .apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0f, 2.0f))))
                         .add(LootItem.lootTableItem(ModItems.ALUMINUM_HORSE_ARMOR).setWeight(10))
                         .add(LootItem.lootTableItem(ModItems.SAPPHIRE_HORSE_ARMOR).setWeight(5))
-                        .add(TagEntry.tagContents(ModTags.Items.CASTS).setWeight(1));
+                        .add(LootItem.lootTableItem(ModItems.PICKAXE_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.AXE_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.SHOVEL_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.SWORD_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.HOE_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.HELMET_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.CHESTPLATE_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.LEGGINGS_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.BOOTS_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.INGOT_CAST).setWeight(1));
                 tableBuilder.pool(poolBuilder.build());
             }
 
@@ -531,7 +549,16 @@ public class ModLootTableModifiers {
                                 .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0f))))
                         .add(LootItem.lootTableItem(ModItems.SULFUR).setWeight(1)
                                 .apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0f, 3.0f))))
-                        .add(TagEntry.tagContents(ModTags.Items.CASTS).setWeight(1));
+                        .add(LootItem.lootTableItem(ModItems.PICKAXE_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.AXE_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.SHOVEL_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.SWORD_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.HOE_HEAD_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.HELMET_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.CHESTPLATE_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.LEGGINGS_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.BOOTS_CAST).setWeight(1))
+                        .add(LootItem.lootTableItem(ModItems.INGOT_CAST).setWeight(1));
                 tableBuilder.pool(poolBuilder.build());
             }
 
