@@ -339,5 +339,8 @@
   "advancements.houseki.foundry_crafting.title": "Melting and Casting",
   "advancements.houseki.foundry_crafting.description": "Crafted a Foundry!",
   "advancements.houseki.meteorite.title": "Space Rock",
-  "advancements.houseki.meteorite.description": "Found a Meteorite!"
+  "advancements.houseki.meteorite.description": "Found a Meteorite!",
+
+  "category.houseki.foundry_melting": "Foundry Melting",
+  "category.houseki.foundry_casting": "Foundry Casting"
 }

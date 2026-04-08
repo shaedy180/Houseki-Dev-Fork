@@ -28,6 +28,12 @@
 		],
 		"client": [
 			"anya.pizza.houseki.HousekiClient"
+		],
+		"rei_client": [
+			"anya.pizza.houseki.compat.rei.HousekiREIClient"
+		],
+		"rei_common": [
+			"anya.pizza.houseki.compat.rei.HousekiREICommon"
 		]
 	},
 	"mixins": [
@@ -39,7 +45,8 @@
 		"fabric-api": "*"
 	},
 	"suggests": {
-		"modmenu": ">=17.0.0-beta.2"
+		"modmenu": ">=17.0.0-beta.2",
+		"rei": ">=21.11.814"
 	},
 	"custom": {
 		"modmenu": {
