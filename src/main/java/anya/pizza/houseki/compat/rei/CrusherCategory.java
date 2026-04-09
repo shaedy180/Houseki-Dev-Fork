@@ -47,7 +47,7 @@ public class CrusherCategory implements DisplayCategory<CrusherDisplay> {
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 35, startPoint.y + 5)).entries(display.getInputEntries().get(0)).markInput());
         // Fuel slot - Iron Ingot (position 13, 41 from screen handler)
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 13, startPoint.y + 51))
-                .entries(EntryIngredient.of(EntryStacks.of(Items.IRON_INGOT))).markInput());
+                .entries(EntryIngredient.of(EntryStacks.of(Items.IRON_INGOT))));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 116, startPoint.y + 40)).entries(display.getOutputEntries().get(0)).disableBackground().markOutput());
         widgets.add(Widgets.createArrow(new Point(startPoint.x + 79, startPoint.y + 39)).animationDurationTicks(250));
 
@@ -64,5 +64,10 @@ public class CrusherCategory implements DisplayCategory<CrusherDisplay> {
     @Override
     public int getDisplayHeight() {
         return 92;
+    }
+
+    @Override
+    public int getDisplayWidth(CrusherDisplay display) {
+        return 176;
     }
 }

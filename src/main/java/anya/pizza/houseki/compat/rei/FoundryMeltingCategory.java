@@ -51,7 +51,7 @@ public class FoundryMeltingCategory implements DisplayCategory<BasicDisplay> {
                 .entries(display.getInputEntries().get(0)).markInput());
         // Fuel slot - Coal (position 26, 53 from screen handler)
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 26, startPoint.y + 53))
-                .entries(EntryIngredient.of(EntryStacks.of(Items.COAL))).markInput());
+                .entries(EntryIngredient.of(EntryStacks.of(Items.COAL))));
         // Melt arrow
         widgets.add(Widgets.createArrow(new Point(startPoint.x + 49, startPoint.y + 35)).animationDurationTicks(200));
         // Output shown in the output slot area
@@ -64,5 +64,10 @@ public class FoundryMeltingCategory implements DisplayCategory<BasicDisplay> {
     @Override
     public int getDisplayHeight() {
         return 92;
+    }
+
+    @Override
+    public int getDisplayWidth(BasicDisplay display) {
+        return 176;
     }
 }
