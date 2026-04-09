@@ -249,6 +249,9 @@ public class ModItems {
     public static final Item MI_HOE_HEAD = registerItem("meteoric_iron_hoe_head", setting -> new Item(setting.maxCount(1)));
     public static final Item MI_SPEAR_HEAD = registerItem("meteoric_iron_spear_head", setting -> new Item(setting.maxCount(1)));
 
+    //Guide
+    public static final Item HOUSEKI_GUIDE = registerItem("houseki_guide", setting -> new HousekiGuideItem(setting.maxCount(1)));
+
     /**
      * Register an Item in the global item registry under this mod's namespace.
      *

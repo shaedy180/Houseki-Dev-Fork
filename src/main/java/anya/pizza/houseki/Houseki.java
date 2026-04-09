@@ -13,9 +13,13 @@ import anya.pizza.houseki.world.gen.ModWorldGeneration;
 import anya.pizza.houseki.world.structure.ModStructures;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.registry.FuelRegistryEvents;
+import net.minecraft.item.ItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static anya.pizza.houseki.util.HousekiGuideBook.RECEIVED_TAG;
 
 public class Houseki implements ModInitializer {
 	public static final String MOD_ID = "houseki";
@@ -48,5 +52,16 @@ public class Houseki implements ModInitializer {
 		PlayerBlockBreakEvents.BEFORE.register(new EDUsageEvent());
 		PlayerBlockBreakEvents.BEFORE.register(new ADUsageEvent());
 		PlayerBlockBreakEvents.BEFORE.register(new PDUsageEvent());
+
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			var player = handler.player;
+			if (!player.getCommandTags().contains(RECEIVED_TAG)) {
+				player.addCommandTag(RECEIVED_TAG);
+				ItemStack guide = new ItemStack(ModItems.HOUSEKI_GUIDE);
+				if (!player.getInventory().insertStack(guide)) {
+					player.dropItem(guide, false);
+				}
+			}
+		});
 	}
 }
