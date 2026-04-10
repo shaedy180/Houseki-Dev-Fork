@@ -57,7 +57,7 @@ public class ModRecipeProvider extends FabricRecipeProvider {
                 CrusherRecipeBuilder.create(Ingredient.of(Items.SANDSTONE), Items.SAND, 100).chance(0.2)
                         .auxiliary(Items.CALCITE).save(output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath("houseki", "sandstone_crushing")));
 
-                CrusherRecipeBuilder.create(Ingredient.of(ModItems.WOLFRAMITE), ModItems.TUNGSTEN, 250).chance(0.5)
+                CrusherRecipeBuilder.create(Ingredient.of(ModItems.WOLFRAMITE), ModItems.TUNGSTEN_POWDER, 250).chance(0.5)
                         .auxiliary(Items.QUARTZ).save(output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath("houseki", "wolframite_crushing")));
 
                 CrusherRecipeBuilder.create(Ingredient.of(ModItems.METEORIC_IRON_INGOT), Items.RAW_IRON, 300).chance(0.35)
@@ -81,7 +81,7 @@ public class ModRecipeProvider extends FabricRecipeProvider {
                 CrusherRecipeBuilder.create(Ingredient.of(ModBlocks.DEEPSLATE_PLATINUM_ORE), ModItems.PLATINUM, 250)
                         .save(output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath("houseki", "deepslate_platinum_ore_crushing")));
 
-                CrusherRecipeBuilder.create(Ingredient.of(ModItems.SCHEELITE), ModItems.TUNGSTEN, 250)
+                CrusherRecipeBuilder.create(Ingredient.of(ModItems.SCHEELITE), ModItems.TUNGSTEN_POWDER, 250)
                         .save(output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath("houseki", "scheelite_crushing")));
 
                 // Smithing Upgrades
