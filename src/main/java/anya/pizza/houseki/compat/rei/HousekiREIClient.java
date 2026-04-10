@@ -59,7 +59,8 @@ public class HousekiREIClient implements REIClientPlugin {
         registry.register(new SimpleTransferHandler() {
             @Override
             public ApplicabilityResult checkApplicable(Context context) {
-                if (context.getMenu() instanceof FoundryScreenHandler
+                if (context.getContainerScreen() != null
+                        && context.getMenu() instanceof FoundryScreenHandler
                         && context.getDisplay().getCategoryIdentifier().equals(FoundryCastingCategory.FOUNDRY_CASTING)) {
                     return ApplicabilityResult.createApplicable();
                 }

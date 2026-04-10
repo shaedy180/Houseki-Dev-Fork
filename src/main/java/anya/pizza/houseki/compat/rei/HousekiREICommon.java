@@ -3,6 +3,7 @@ package anya.pizza.houseki.compat.rei;
 import anya.pizza.houseki.Houseki;
 import anya.pizza.houseki.item.ModItems;
 import anya.pizza.houseki.recipe.CrusherRecipe;
+import anya.pizza.houseki.recipe.FoundryMeltingRecipe;
 import anya.pizza.houseki.recipe.ModRecipes;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
@@ -20,7 +21,11 @@ public class HousekiREICommon implements REICommonPlugin {
     public void registerDisplays(ServerDisplayRegistry registry) {
         registry.beginRecipeFiller(CrusherRecipe.class)
                 .filterType(ModRecipes.CRUSHER_TYPE)
-                .fill(entry -> new CrusherDisplay(entry));
+                .fill(CrusherDisplay::new);
+
+        registry.beginRecipeFiller(FoundryMeltingRecipe.class)
+                .filterType(ModRecipes.FOUNDRY_MELTING_TYPE)
+                .fill(FoundryMeltingDisplay::new);
 
         registerCastingDisplays(registry);
     }
@@ -40,7 +45,6 @@ public class HousekiREICommon implements REICommonPlugin {
         addCasting(registry, ModItems.STEEL, ModItems.BOOTS_CAST, ModItems.CAST_STEEL_BOOTS);
 
         // Meteoric Iron casting recipes
-        addCasting(registry, ModItems.METEORIC_IRON_INGOT, ModItems.INGOT_CAST, ModItems.METEORIC_IRON_INGOT);
         addCasting(registry, ModItems.METEORIC_IRON_INGOT, ModItems.PICKAXE_HEAD_CAST, ModItems.MI_PICKAXE_HEAD);
         addCasting(registry, ModItems.METEORIC_IRON_INGOT, ModItems.AXE_HEAD_CAST, ModItems.MI_AXE_HEAD);
         addCasting(registry, ModItems.METEORIC_IRON_INGOT, ModItems.SHOVEL_HEAD_CAST, ModItems.MI_SHOVEL_HEAD);
