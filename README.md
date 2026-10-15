@@ -536,3 +536,9 @@ Feel free to use this mod in your Modrinth/Curseforge-hosted modpacks without as
 
 
 This is my first mod and attempt at pixel art. So I do apologize for any problems and bad artwork.
+
+## Development, versions and releases
+
+This fork's canonical source targets Minecraft 1.21.11, Java 21 and Fabric; exact dependency versions are in `gradle.properties`. Read [AGENTS.md](AGENTS.md). Build with `./gradlew build --no-daemon`; CI validates the wrapper, builds and uploads `build/libs/*.jar`. Install only a jar built for the matching Minecraft/Fabric version in `mods`, keeping world backups and the previous jar for rollback. There is no VPS deployment.
+
+Use the single `working-branch` → `main` PR. Historical Minecraft branches are preserved as recovery tags; a tag alone is not proof of compatibility. The preserved upstream README content above documents mod features, not a promise that every historical version is currently maintained. Keep `LICENSE.md` and upstream attribution intact.
