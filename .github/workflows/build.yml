@@ -10,7 +10,7 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  build:
+  canonical:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -25,3 +25,68 @@ jobs:
           name: Houseki-Dev-Fork-${{ github.sha }}
           path: build/libs/*.jar
           if-no-files-found: error
+
+  compatibility:
+    name: Compatibility (${{ matrix.version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - version: '1.21.1'
+            revision: 'b7ce041b395217577d9defe3e37cf28b88a034f6'
+            java: '21'
+          - version: '1.21.3'
+            revision: '89856b7992d13a8cebf1eb4303e6414af2cd4eec'
+            java: '21'
+          - version: '1.21.4'
+            revision: 'e54ec127a464eac6b86d2aa02fc1b62be21c3dde'
+            java: '21'
+          - version: '1.21.5'
+            revision: '994c40373b60cd96bfca1e758efb822c5e608257'
+            java: '21'
+          - version: '1.21.6'
+            revision: '8a1433d4881bb2aaaca04b99152b2b68db2603e6'
+            java: '21'
+          - version: '1.21.10'
+            revision: '6ebb28fffc1dd9965051cc67b0473ad6646005d4'
+            java: '21'
+          - version: '1.21.11-GuideBook'
+            revision: '109f5b719874792ebf4ee50487cf8253bdfc8c64'
+            java: '21'
+          - version: '1.21.11'
+            revision: 'f1d0b6f1f785757da1812df2149dddf639a741f4'
+            java: '21'
+          - version: '26.1'
+            revision: 'c0ead859c2e474f3992f6382b27e2388fbf8c44e'
+            java: '25'
+          - version: '26.1.2'
+            revision: 'cb4b8892454e8b253d41ab6154b684290057ac5e'
+            java: '25'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.revision }}
+      - uses: gradle/actions/wrapper-validation@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x ./gradlew && ./gradlew build --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Houseki-${{ matrix.version }}-${{ matrix.revision }}
+          path: build/libs/*.jar
+          if-no-files-found: error
+          retention-days: 90
+  build:
+    if: always()
+    needs: [canonical, compatibility]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require current and preserved version builds
+        env:
+          CURRENT: ${{ needs.canonical.result }}
+          COMPATIBILITY: ${{ needs.compatibility.result }}
+        run: test "$CURRENT" = success && test "$COMPATIBILITY" = success
