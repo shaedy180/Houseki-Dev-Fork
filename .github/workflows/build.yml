@@ -1,16 +1,22 @@
 name: Build
 on:
   push:
-    branches: [main, working-branch]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      historical_compatibility:
+        description: Rebuild all ten preserved historical source revisions
+        type: boolean
+        default: false
 permissions: {contents: read}
 concurrency:
-  group: build-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   canonical:
+    if: ${{ (github.event_name != 'push' || github.ref != 'refs/heads/main') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -26,7 +32,35 @@ jobs:
           path: build/libs/*.jar
           if-no-files-found: error
 
+  compatibility_scope:
+    if: ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    outputs:
+      required: ${{ steps.scope.outputs.required }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - id: scope
+        env:
+          EVENT: ${{ github.event_name }}
+          REQUESTED: ${{ inputs.historical_compatibility }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          required=false
+          if [ "$EVENT" = workflow_dispatch ]; then
+            if [ "$REQUESTED" = true ]; then required=true; fi
+          else
+            changed=$(git diff --name-only "$BASE" "$HEAD" -- .github/workflows/build.yml)
+            if [ -n "$changed" ]; then required=true; fi
+          fi
+          echo "required=$required" >> "$GITHUB_OUTPUT"
+
   compatibility:
+    needs: compatibility_scope
+    if: ${{ needs.compatibility_scope.outputs.required == 'true' }}
     name: Compatibility (${{ matrix.version }})
     runs-on: ubuntu-latest
     strategy:
@@ -81,12 +115,54 @@ jobs:
           if-no-files-found: error
           retention-days: 90
   build:
-    if: always()
-    needs: [canonical, compatibility]
+    if: ${{ (always()) && (github.event_name != 'push' || github.ref != 'refs/heads/main') }}
+    needs: [canonical, compatibility_scope, compatibility]
     runs-on: ubuntu-latest
     steps:
       - name: Require current and preserved version builds
         env:
+          SCOPE: ${{ needs.compatibility_scope.result }}
+          REQUESTED: ${{ needs.compatibility_scope.outputs.required }}
           CURRENT: ${{ needs.canonical.result }}
           COMPATIBILITY: ${{ needs.compatibility.result }}
-        run: test "$CURRENT" = success && test "$COMPATIBILITY" = success
+        run: |
+          test "$SCOPE" = success
+          test "$CURRENT" = success
+          if [ "$REQUESTED" = true ]; then
+            test "$COMPATIBILITY" = success
+          else
+            test "$REQUESTED" = false
+            test "$COMPATIBILITY" = skipped
+          fi
+
+  ci_provenance:
+    name: CI provenance
+    if: always()
+    needs: ["canonical", "compatibility", "build"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Test verification safeguards
+        run: node --test .github/scripts/ci-provenance.test.cjs
+      - name: Record PR validation or verify merged source
+        id: receipt
+        uses: actions/github-script@v8
+        env:
+          CI_JOB_RESULTS: ${{ toJSON(needs) }}
+          CI_REQUIRED_JOBS: '["build"]'
+        with:
+          script: |
+            await require('./.github/scripts/ci-provenance.cjs')({ github, context, core });
+      - name: Preserve successful PR validation receipt
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.receipt.outputs.artifact }}
+          path: ci-validation.json
+          if-no-files-found: error
+          retention-days: 90

@@ -545,7 +545,7 @@ Use the single `working-branch` → `main` PR. Historical Minecraft branches are
 
 ## Preserved Minecraft compatibility revisions
 
-The following immutable source revisions retain the former version branches and their unique changes. CI builds each revision with its required Java version and uploads the resulting jars. Version branches are removed only after their exact source builds pass; recovery tags remain. A jar build does not prove world/save compatibility: back up worlds and test the matching Minecraft/Fabric installation before use.
+The following immutable source revisions retain the former version branches and their unique changes. CI rebuilds these fixed revisions when their build workflow changes, or when **Run workflow** is invoked with **historical_compatibility** enabled. Ordinary application changes build the current source once in the PR; they do not rebuild ten unchanged historical trees. Every requested historical build must pass the required gate and uploads its matching jar. Version branches are removed only after their exact source builds pass; recovery tags remain. A jar build does not prove world/save compatibility: back up worlds and test the matching Minecraft/Fabric installation before use.
 
 | Former version branch | Source revision | Recovery tag |
 | --- | --- | --- |
@@ -559,3 +559,11 @@ The following immutable source revisions retain the former version branches and 
 | 1.21.11 | `f1d0b6f1f785757da1812df2149dddf639a741f4` | `cleanup-recovery/2026-10-15/1.21.11` |
 | 26.1 | `c0ead859c2e474f3992f6382b27e2388fbf8c44e` | `cleanup-recovery/2026-10-15/26.1` |
 | 26.1.2 | `cb4b8892454e8b253d41ab6154b684290057ac5e` | `cleanup-recovery/2026-10-15/26.1.2` |
+
+## Efficient CI and verified releases
+
+Open a draft or ready PR from `working-branch` to `main` to run the complete validation suite. A push to `working-branch` alone does not start CI; use **Run workflow** for checks before opening a PR. New PR updates cancel obsolete runs for that PR. Main and release runs are never cancelled by a newer PR update.
+
+After every required PR job succeeds, **CI provenance** records the tested merge commit. On a `main` push, CI runs only a small verification gate: the latest matching PR run must be successful, its receipt must be current and unexpired, and its tested Git tree and both merge parents must exactly match the actual merge. Missing, failed, stale or mismatched evidence blocks release instead of silently skipping checks. Update the PR against current `main` and wait for all required checks before merging. If a receipt has expired, rerun the complete original PR workflow, then rerun the main gate.
+
+Release-specific builds, tag checks, immutable commit labels, publishing and deployment safeguards remain in place. Main publication starts only after the verification gate succeeds; the application test suite is not repeated after merge. Manual and tag/release validation remain available. Keep both the existing required checks and **CI provenance** required in branch protection.
