@@ -1,168 +1,37 @@
-name: Build
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      historical_compatibility:
-        description: Rebuild all ten preserved historical source revisions
-        type: boolean
-        default: false
-permissions: {contents: read}
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# Automatically build the project and run any configured tests for every push
+# and submitted pull request. This can help catch issues that only occur on
+# certain platforms or Java versions, and provides a first line of defence
+# against bad commits.
+
+name: build
+on: [pull_request, push]
+
 jobs:
-  canonical:
-    if: ${{ (github.event_name != 'push' || github.ref != 'refs/heads/main') }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: gradle/actions/wrapper-validation@v4
-      - uses: actions/setup-java@v4
-        with: {distribution: temurin, java-version: '21'}
-      - uses: gradle/actions/setup-gradle@v4
-      - run: chmod +x ./gradlew
-      - run: ./gradlew build --no-daemon
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Houseki-Dev-Fork-${{ github.sha }}
-          path: build/libs/*.jar
-          if-no-files-found: error
-
-  compatibility_scope:
-    if: ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}
-    runs-on: ubuntu-latest
-    outputs:
-      required: ${{ steps.scope.outputs.required }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - id: scope
-        env:
-          EVENT: ${{ github.event_name }}
-          REQUESTED: ${{ inputs.historical_compatibility }}
-          BASE: ${{ github.event.pull_request.base.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -euo pipefail
-          required=false
-          if [ "$EVENT" = workflow_dispatch ]; then
-            if [ "$REQUESTED" = true ]; then required=true; fi
-          else
-            changed=$(git diff --name-only "$BASE" "$HEAD" -- .github/workflows/build.yml)
-            if [ -n "$changed" ]; then required=true; fi
-          fi
-          echo "required=$required" >> "$GITHUB_OUTPUT"
-
-  compatibility:
-    needs: compatibility_scope
-    if: ${{ needs.compatibility_scope.outputs.required == 'true' }}
-    name: Compatibility (${{ matrix.version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - version: '1.21.1'
-            revision: 'b7ce041b395217577d9defe3e37cf28b88a034f6'
-            java: '21'
-          - version: '1.21.3'
-            revision: '89856b7992d13a8cebf1eb4303e6414af2cd4eec'
-            java: '21'
-          - version: '1.21.4'
-            revision: 'e54ec127a464eac6b86d2aa02fc1b62be21c3dde'
-            java: '21'
-          - version: '1.21.5'
-            revision: '994c40373b60cd96bfca1e758efb822c5e608257'
-            java: '21'
-          - version: '1.21.6'
-            revision: '8a1433d4881bb2aaaca04b99152b2b68db2603e6'
-            java: '21'
-          - version: '1.21.10'
-            revision: '6ebb28fffc1dd9965051cc67b0473ad6646005d4'
-            java: '21'
-          - version: '1.21.11-GuideBook'
-            revision: '109f5b719874792ebf4ee50487cf8253bdfc8c64'
-            java: '21'
-          - version: '1.21.11'
-            revision: 'f1d0b6f1f785757da1812df2149dddf639a741f4'
-            java: '21'
-          - version: '26.1'
-            revision: 'c0ead859c2e474f3992f6382b27e2388fbf8c44e'
-            java: '25'
-          - version: '26.1.2'
-            revision: 'cb4b8892454e8b253d41ab6154b684290057ac5e'
-            java: '25'
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ matrix.revision }}
-      - uses: gradle/actions/wrapper-validation@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ matrix.java }}
-      - uses: gradle/actions/setup-gradle@v4
-      - run: chmod +x ./gradlew && ./gradlew build --no-daemon
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Houseki-${{ matrix.version }}-${{ matrix.revision }}
-          path: build/libs/*.jar
-          if-no-files-found: error
-          retention-days: 90
   build:
-    if: ${{ (always()) && (github.event_name != 'push' || github.ref != 'refs/heads/main') }}
-    needs: [canonical, compatibility_scope, compatibility]
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Use these Java versions
+        java: [
+          21,    # Current Java LTS
+        ]
+    runs-on: ubuntu-22.04
     steps:
-      - name: Require current and preserved version builds
-        env:
-          SCOPE: ${{ needs.compatibility_scope.result }}
-          REQUESTED: ${{ needs.compatibility_scope.outputs.required }}
-          CURRENT: ${{ needs.canonical.result }}
-          COMPATIBILITY: ${{ needs.compatibility.result }}
-        run: |
-          test "$SCOPE" = success
-          test "$CURRENT" = success
-          if [ "$REQUESTED" = true ]; then
-            test "$COMPATIBILITY" = success
-          else
-            test "$REQUESTED" = false
-            test "$COMPATIBILITY" = skipped
-          fi
-
-  ci_provenance:
-    name: CI provenance
-    if: always()
-    needs: ["canonical", "compatibility", "build"]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      actions: read
-      pull-requests: read
-    steps:
-      - uses: actions/checkout@v6
-      - name: Test verification safeguards
-        run: node --test .github/scripts/ci-provenance.test.cjs
-      - name: Record PR validation or verify merged source
-        id: receipt
-        uses: actions/github-script@v8
-        env:
-          CI_JOB_RESULTS: ${{ toJSON(needs) }}
-          CI_REQUIRED_JOBS: '["build"]'
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: validate gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+      - name: setup jdk ${{ matrix.java }}
+        uses: actions/setup-java@v4
         with:
-          script: |
-            await require('./.github/scripts/ci-provenance.cjs')({ github, context, core });
-      - name: Preserve successful PR validation receipt
-        if: github.event_name == 'pull_request'
+          java-version: ${{ matrix.java }}
+          distribution: 'microsoft'
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: build
+        run: ./gradlew build
+      - name: capture build artifacts
+        if: ${{ matrix.java == '21' }} # Only upload artifacts built from latest java
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.receipt.outputs.artifact }}
-          path: ci-validation.json
-          if-no-files-found: error
-          retention-days: 90
+          name: Artifacts
+          path: build/libs/

@@ -536,34 +536,3 @@ Feel free to use this mod in your Modrinth/Curseforge-hosted modpacks without as
 
 
 This is my first mod and attempt at pixel art. So I do apologize for any problems and bad artwork.
-
-## Development, versions and releases
-
-This fork's canonical source targets Minecraft 1.21.11, Java 21 and Fabric; exact dependency versions are in `gradle.properties`. Read [AGENTS.md](AGENTS.md). Build with `./gradlew build --no-daemon`; CI validates the wrapper, builds and uploads `build/libs/*.jar`. Install only a jar built for the matching Minecraft/Fabric version in `mods`, keeping world backups and the previous jar for rollback. There is no VPS deployment.
-
-Use the single `working-branch` → `main` PR. Historical Minecraft branches are preserved as recovery tags; a tag alone is not proof of compatibility. The preserved upstream README content above documents mod features, not a promise that every historical version is currently maintained. Keep `LICENSE.md` and upstream attribution intact.
-
-## Preserved Minecraft compatibility revisions
-
-The following immutable source revisions retain the former version branches and their unique changes. CI rebuilds these fixed revisions when their build workflow changes, or when **Run workflow** is invoked with **historical_compatibility** enabled. Ordinary application changes build the current source once in the PR; they do not rebuild ten unchanged historical trees. Every requested historical build must pass the required gate and uploads its matching jar. Version branches are removed only after their exact source builds pass; recovery tags remain. A jar build does not prove world/save compatibility: back up worlds and test the matching Minecraft/Fabric installation before use.
-
-| Former version branch | Source revision | Recovery tag |
-| --- | --- | --- |
-| 1.21.1 | `b7ce041b395217577d9defe3e37cf28b88a034f6` | `cleanup-recovery/2026-10-15/1.21.1` |
-| 1.21.3 | `89856b7992d13a8cebf1eb4303e6414af2cd4eec` | `cleanup-recovery/2026-10-15/1.21.3` |
-| 1.21.4 | `e54ec127a464eac6b86d2aa02fc1b62be21c3dde` | `cleanup-recovery/2026-10-15/1.21.4` |
-| 1.21.5 | `994c40373b60cd96bfca1e758efb822c5e608257` | `cleanup-recovery/2026-10-15/1.21.5` |
-| 1.21.6 | `8a1433d4881bb2aaaca04b99152b2b68db2603e6` | `cleanup-recovery/2026-10-15/1.21.6` |
-| 1.21.10 | `6ebb28fffc1dd9965051cc67b0473ad6646005d4` | `cleanup-recovery/2026-10-15/1.21.10` |
-| 1.21.11-GuideBook | `109f5b719874792ebf4ee50487cf8253bdfc8c64` | `cleanup-recovery/2026-10-15/1.21.11-GuideBook` |
-| 1.21.11 | `f1d0b6f1f785757da1812df2149dddf639a741f4` | `cleanup-recovery/2026-10-15/1.21.11` |
-| 26.1 | `c0ead859c2e474f3992f6382b27e2388fbf8c44e` | `cleanup-recovery/2026-10-15/26.1` |
-| 26.1.2 | `cb4b8892454e8b253d41ab6154b684290057ac5e` | `cleanup-recovery/2026-10-15/26.1.2` |
-
-## Efficient CI and verified releases
-
-Open a draft or ready PR from `working-branch` to `main` to run the complete validation suite. A push to `working-branch` alone does not start CI; use **Run workflow** for checks before opening a PR. New PR updates cancel obsolete runs for that PR. Main and release runs are never cancelled by a newer PR update.
-
-After every required PR job succeeds, **CI provenance** records the tested merge commit. On a `main` push, CI runs only a small verification gate: the latest matching PR run must be successful, its receipt must be current and unexpired, and its tested Git tree and both merge parents must exactly match the actual merge. Missing, failed, stale or mismatched evidence blocks release instead of silently skipping checks. Update the PR against current `main` and wait for all required checks before merging. If a receipt has expired, rerun the complete original PR workflow, then rerun the main gate.
-
-Release-specific builds, tag checks, immutable commit labels, publishing and deployment safeguards remain in place. Main publication starts only after the verification gate succeeds; the application test suite is not repeated after merge. Manual and tag/release validation remain available. Keep both the existing required checks and **CI provenance** required in branch protection.
